@@ -47,7 +47,7 @@ with col_logout:
         st.rerun()
 
 # Company Brand Identity Header (Logo & Title)
-logo_col1, logo_col2, logo_col3 = st.columns()
+logo_col1, logo_col2, logo_col3 = st.columns(3)
 with logo_col2:
     logo_url = st.file_uploader("🏢 Company Logo Upload Karen (Optional)", type=["png", "jpg", "jpeg"])
     if logo_url:
