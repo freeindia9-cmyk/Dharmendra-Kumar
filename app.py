@@ -17,8 +17,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 🔐 SECRET PASSWORD CONFIGURATION
-# Aap jo bhi password rakhna chahte hain, use niche "MeraSecretPass123" ki jagah likh dein
-SECRET_PASSWORD = "MONSTER@3992"
+# Aap is password ko badal kar apna koi bhi personal password rakh sakte hain
+SECRET_PASSWORD = "MONSTER@123"
 
 # Initialize Login State
 if 'logged_in' not in st.session_state:
@@ -26,32 +26,31 @@ if 'logged_in' not in st.session_state:
 
 # --- 1. LOGIN SCREEN ---
 if not st.session_state.logged_in:
-    col1, col2, col3 = st.columns([1, 1.2, 1])
+    col1, col2, col3 = st.columns(3) # Fixed version specification layout
     with col2:
         st.write("## 🔒 Secure Admin Login")
         user_pass = st.text_input("Secret Admin Password Enter Karen", type="password")
         if st.button("Login", use_container_width=True):
             if user_pass == SECRET_PASSWORD:
                 st.session_state.logged_in = True
-                st.rerun() # Refresh app to show contents
+                st.rerun()
             else:
                 st.error("❌ Galat Password! Kripya sahi password dalein.")
-    st.stop() # Stops execution here so unauthenticated users see nothing else
+    st.stop()
 
 # --- 2. MAIN APP CONTENTS (Only shows after successful login) ---
-# Logout Button on Top Right
-col_title, col_logout = st.columns([9, 1])
+col_title, col_logout = st.columns([5, 1])
 with col_logout:
-    if st.button("🔒 Logout"):
+    if st.button("🔒 Logout", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
 
 # Company Brand Identity Header (Logo & Title)
-logo_col1, logo_col2, logo_col3 = st.columns(3)
+logo_col1, logo_col2, logo_col3 = st.columns(3) # Fixed missing positional index argument 
 with logo_col2:
     logo_url = st.file_uploader("🏢 Company Logo Upload Karen (Optional)", type=["png", "jpg", "jpeg"])
     if logo_url:
-        st.image(logo_url, width=150, use_container_width=False)
+        st.image(logo_url, width=150)
     else:
         st.markdown("<h3 style='text-align: center; color: #777;'>[ Company Logo Placeholder ]</h3>", unsafe_allow_html=True)
         
@@ -69,7 +68,7 @@ dispatch_speed = st.sidebar.slider("Dispatch Rate Delay (Seconds)", 0.5, 5.0, 1.
 # Dynamic Template Builder
 st.write("---")
 st.write("### ✉️ Smart Template Customizer")
-col_sub, col_tokens = st.columns()
+col_sub, col_tokens = st.columns(2)
 with col_sub:
     subject = st.text_input("Email Subject Line", value="Important: Invoice {InvoiceNo} and Stock Update")
 with col_tokens:
