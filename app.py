@@ -18,7 +18,7 @@ st.markdown("""
 
 # 🔐 SECRET PASSWORD CONFIGURATION
 # Aap jo bhi password rakhna chahte hain, use niche "MeraSecretPass123" ki jagah likh dein
-SECRET_PASSWORD = "Monster@3992"
+SECRET_PASSWORD = "MONSTER@3992"
 
 # Initialize Login State
 if 'logged_in' not in st.session_state:
