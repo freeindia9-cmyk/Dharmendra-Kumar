@@ -16,10 +16,39 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 1. Company Brand Identity Header (Logo & Title)
-logo_col1, logo_col2, logo_col3 = st.columns([1, 2, 1])
+# 🔐 SECRET PASSWORD CONFIGURATION
+# Aap jo bhi password rakhna chahte hain, use niche "MeraSecretPass123" ki jagah likh dein
+SECRET_PASSWORD = "MeraSecretPass123"
+
+# Initialize Login State
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+# --- 1. LOGIN SCREEN ---
+if not st.session_state.logged_in:
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+    with col2:
+        st.write("## 🔒 Secure Admin Login")
+        user_pass = st.text_input("Secret Admin Password Enter Karen", type="password")
+        if st.button("Login", use_container_width=True):
+            if user_pass == SECRET_PASSWORD:
+                st.session_state.logged_in = True
+                st.rerun() # Refresh app to show contents
+            else:
+                st.error("❌ Galat Password! Kripya sahi password dalein.")
+    st.stop() # Stops execution here so unauthenticated users see nothing else
+
+# --- 2. MAIN APP CONTENTS (Only shows after successful login) ---
+# Logout Button on Top Right
+col_title, col_logout = st.columns([9, 1])
+with col_logout:
+    if st.button("🔒 Logout"):
+        st.session_state.logged_in = False
+        st.rerun()
+
+# Company Brand Identity Header (Logo & Title)
+logo_col1, logo_col2, logo_col3 = st.columns()
 with logo_col2:
-    # Yahan aap apna local logo file path (jaise "logo.png") ya online URL daal sakte hain
     logo_url = st.file_uploader("🏢 Company Logo Upload Karen (Optional)", type=["png", "jpg", "jpeg"])
     if logo_url:
         st.image(logo_url, width=150, use_container_width=False)
@@ -29,7 +58,7 @@ with logo_col2:
     st.markdown('<div class="main-title">📈 CRM Bulk Invoice & Stock Dispatcher</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">Personalized Billing & Inventory Delivery Engine</div>', unsafe_allow_html=True)
 
-# 2. Sidebar - SMTP Settings
+# Sidebar - SMTP Settings
 st.sidebar.header("🔑 SMTP Server Connection")
 smtp_server = st.sidebar.text_input("SMTP Server", "://gmail.com")
 smtp_port = st.sidebar.number_input("SMTP Port", value=587)
@@ -37,10 +66,10 @@ sender_email = st.sidebar.text_input("Sender Email ID")
 sender_password = st.sidebar.text_input("16-Digit App Password", type="password")
 dispatch_speed = st.sidebar.slider("Dispatch Rate Delay (Seconds)", 0.5, 5.0, 1.0)
 
-# 3. Dynamic Template Builder
+# Dynamic Template Builder
 st.write("---")
 st.write("### ✉️ Smart Template Customizer")
-col_sub, col_tokens = st.columns([2, 1])
+col_sub, col_tokens = st.columns()
 with col_sub:
     subject = st.text_input("Email Subject Line", value="Important: Invoice {InvoiceNo} and Stock Update")
 with col_tokens:
@@ -53,11 +82,10 @@ email_template = st.text_area(
     height=200
 )
 
-# 4. Data Source - Pre-populated Base Sheet with Edit Options
+# Data Source - Pre-populated Base Sheet
 st.write("---")
 st.write("### 📊 Excel Data Grid (Click any cell to Edit directly)")
 
-# Base structural columns with Invoice, Stock and Special Message parameters
 if 'crm_data' not in st.session_state:
     initial_rows = {
         "Name": ["Aarav Sharma", "Priya Patel", "Rahul Verma", "Ananya Iyer", "Amit Gupta"],
@@ -69,7 +97,6 @@ if 'crm_data' not in st.session_state:
     }
     st.session_state.crm_data = pd.DataFrame(initial_rows)
 
-# Let user upload a fresh spreadsheet to replace grid entirely if required
 uploaded_file = st.file_uploader("🔄 Raw Excel File (.xlsx) Se Fresh Records Import Karen", type=["xlsx", "csv"])
 if uploaded_file:
     if uploaded_file.name.endswith('.csv'):
@@ -77,10 +104,9 @@ if uploaded_file:
     else:
         st.session_state.crm_data = pd.read_excel(uploaded_file)
 
-# ST.DATA_EDITOR allows user to edit text fields on screen like an Excel sheets view!
 edited_df = st.data_editor(st.session_state.crm_data, num_rows="dynamic", use_container_width=True)
 
-# 5. Live Queue Metrics Dashboard
+# Live Queue Metrics Dashboard
 st.write("---")
 st.write("### 📈 Live Processing Counters")
 total_recipients = len(edited_df)
@@ -93,7 +119,7 @@ p_failed = m_col3.empty()
 p_success.markdown("<div class='metric-box'>✅ Sent Success<br><h2>0 Successful</h2></div>", unsafe_allow_html=True)
 p_failed.markdown("<div class='metric-box'>❌ Failed Bounces<br><h2>0 Failed</h2></div>", unsafe_allow_html=True)
 
-# 6. Bulk Transmission Loop Execution
+# Bulk Transmission Loop Execution
 if st.button("🚀 Execute Smart Bulk Mail Dispatch", use_container_width=True):
     if not sender_email or not sender_password:
         st.error("🔒 Please establish secure server authentication credentials inside the Sidebar panel first!")
@@ -110,20 +136,16 @@ if st.button("🚀 Execute Smart Bulk Mail Dispatch", use_container_width=True):
             for index, row in edited_df.iterrows():
                 try:
                     to_email = str(row["Email"]).strip()
-                    
-                    # Formatting values dynamically using structural dictionary references
                     formatted_subject = subject.format(
                         Name=str(row.get("Name","")), Company=str(row.get("Company","")),
                         InvoiceNo=str(row.get("InvoiceNo","")), StockQty=str(row.get("StockQty","")),
                         SpecialMsg=str(row.get("SpecialMsg",""))
                     )
-                    
                     formatted_body = email_template.format(
                         Name=str(row.get("Name","")), Company=str(row.get("Company","")),
                         InvoiceNo=str(row.get("InvoiceNo","")), StockQty=str(row.get("StockQty","")),
                         SpecialMsg=str(row.get("SpecialMsg",""))
                     )
-                    
                     msg = MIMEMultipart()
                     msg['From'] = sender_email
                     msg['To'] = to_email
