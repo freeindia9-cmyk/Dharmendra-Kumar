@@ -122,18 +122,27 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Dynamic Column Extractor Logic
+# 3. Robust Dynamic Field Matching Engine
 def get_field_strict(row, column_aliases, default_val="N/A"):
-    # Strip spaces, underscores, hyphens for fuzzy header matching
-    aliases_clean = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
+    # Strip spaces, special characters to allow bulletproof header comparison
+    clean_aliases = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
     for col in row.index:
         col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
-        if col_clean in aliases_clean:
+        if col_clean in clean_aliases:
             val = str(row[col]).strip()
-            if val and val.lower() not in ["nan", "none", "n/a", ""]:
+            if val and val.lower() not in ["nan", "none", "n/a", "", "null"]:
                 return val
                 
+    # Fallback: Check if any key contains partial match (e.g., 'transport')
+    for col in row.index:
+        col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
+        for alias in clean_aliases:
+            if alias in col_clean or col_clean in alias:
+                val = str(row[col]).strip()
+                if val and val.lower() not in ["nan", "none", "n/a", "", "null"]:
+                    return val
+                    
     return default_val
 
 # 4. Default Records Generator
@@ -229,13 +238,13 @@ if uploaded_file is not None:
         else:
             new_df = pd.read_excel(uploaded_file, engine='openpyxl')
         
-        # Strip string spaces from column headers
-        new_df.columns = new_df.columns.astype(str).str.strip()
+        # Clean column headers
+        new_df.columns = [str(c).strip() for c in new_df.columns]
         
         st.session_state['crm_data'] = new_df
         st.session_state['sent_count'] = 0
         st.session_state['failed_count'] = 0
-        st.success(f"✅ Successfully loaded {len(new_df)} exact records from Excel!")
+        st.success(f"✅ Successfully loaded {len(new_df)} records!")
     except Exception as e:
         st.error(f"❌ File loading failed: {e}")
 
@@ -260,7 +269,7 @@ st.markdown("---")
 
 # 9. Editable Data Grid
 st.markdown(f"### ✏️ Interactive Live Grid ({len(df)} Records Ready)")
-st.caption("💡 Tip: Double click any cell to instantly modify details before dispatch.")
+st.caption("💡 Tip: Double click any cell to instantly modify details.")
 
 edited_df = st.data_editor(
     st.session_state['crm_data'],
@@ -273,7 +282,7 @@ edited_df = st.data_editor(
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 10. Smart Dispatch Engine (Strict Row-By-Row Dynamic Extraction)
+# 10. Smart Dispatch Engine
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -304,25 +313,26 @@ if start_btn:
         try:
             server = smtplib.SMTP(smtp_server, int(smtp_port))
             server.starttls()
-            server.login(sender_email, app_password)
+            server.login(sender_email.strip(), app_password.replace(" ", ""))
 
-            # Direct Row Iteration guarantees exact value per row
-            for idx, row in df.iterrows():
+            for idx in range(len(df)):
                 if st.session_state['stop_dispatch']:
                     st.error("🛑 Dispatch process halted manually!")
                     break
 
-                # Extract exact row data dynamically
+                row = df.iloc[idx]
+
+                # Dynamic field extraction
                 cust_name = get_field_strict(row, ["Name", "Customer Name", "Client Name", "Party Name", "Customer"], "Customer")
                 target_email = get_field_strict(row, ["Email", "Email ID", "Mail", "Email Address", "Mail ID"], "").strip()
                 inv_no = get_field_strict(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice", "Bill No"], "N/A")
                 inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date", "Date"], "N/A")
                 disp_date = get_field_strict(row, ["Dispatch Date", "Dispatch_Date", "Disp Date", "Despatch Date"], "N/A")
                 
-                # Strict Transporter Extraction for THIS specific row
+                # Multi-alias Transporter matching
                 transporter_val = get_field_strict(
                     row, 
-                    ["Transporter Name", "Transporter_Name", "Transporter", "Courier", "Transport", "TransporterName", "LR Transporter", "Vendor", "Vehicle", "Mode of Transport"], 
+                    ["Transporter Name", "Transporter_Name", "Transporter", "Courier", "Transport", "TransporterName", "LR Transporter", "Vendor", "Vehicle", "Mode of Transport", "Transport Name"], 
                     "N/A"
                 )
                 
@@ -456,7 +466,7 @@ if start_btn:
                 else:
                     st.session_state['failed_count'] += 1
 
-                pct = (st.session_state['sent_count'] + st.session_state['failed_count']) / len(df)
+                pct = (idx + 1) / len(df)
                 progress_bar.progress(pct)
                 time.sleep(dispatch_delay)
 
