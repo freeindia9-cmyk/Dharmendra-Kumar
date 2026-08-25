@@ -105,29 +105,31 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Strict Column Extraction Function (Prevents Overlap)
-def get_column_data(row, exact_keywords, default_val="N/A"):
-    # 1. Exact Match Check
-    for kw in exact_keywords:
-        for col in row.index:
-            if str(col).strip().lower() == str(kw).strip().lower():
-                val = str(row[col]).strip()
-                if val and val.lower() not in ["nan", "none", ""]:
-                    return val
+# 3. Super Robust Value Extractor (Guaranteed Zero N/A Fix)
+def extract_value_bulletproof(row, target_keys, default_val="N/A"):
+    # Clean keys list
+    clean_target_keys = [re.sub(r'[^a-zA-Z0-9]', '', str(k)).lower() for k in target_keys]
+    
+    # 1st Pass: Clean string match
+    for col in row.index:
+        clean_col = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
+        if clean_col in clean_target_keys:
+            val = str(row[col]).strip()
+            if val and val.lower() not in ["nan", "none", "n/a", ""]:
+                return val
 
-    # 2. Clean Word Boundaries Check
-    for kw in exact_keywords:
-        kw_clean = re.sub(r'[^a-zA-Z0-9]', '', str(kw)).lower()
-        for col in row.index:
-            col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
-            if col_clean == kw_clean:
+    # 2nd Pass: Substring search (e.g. 'transporter' in 'transporter name')
+    for col in row.index:
+        clean_col = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
+        for tk in clean_target_keys:
+            if tk in clean_col or clean_col in tk:
                 val = str(row[col]).strip()
-                if val and val.lower() not in ["nan", "none", ""]:
+                if val and val.lower() not in ["nan", "none", "n/a", ""]:
                     return val
 
     return default_val
 
-# 3. Default 100 Sample Customer Records Generator
+# 4. Default 100 Sample Customer Records Generator
 @st.cache_data
 def load_default_100_records():
     names_list = [
@@ -172,7 +174,7 @@ if 'sent_count' not in st.session_state:
 if 'failed_count' not in st.session_state:
     st.session_state['failed_count'] = 0
 
-# 4. Sidebar Controls
+# 5. Sidebar Controls
 with st.sidebar:
     st.markdown("### 🖼️ 4K Branding Studio")
     logo_file = st.file_uploader("Upload High-Res Logo", type=["png", "jpg", "jpeg"])
@@ -186,7 +188,7 @@ with st.sidebar:
     app_password = st.text_input("16-Digit App Password", type="password")
     dispatch_delay = st.slider("Dispatch Rate Delay (Seconds)", 0.5, 5.0, 1.0)
 
-# 5. Dynamic Header Section
+# 6. Dynamic Header Section
 col_logo, col_title = st.columns([1, 5])
 
 with col_logo:
@@ -203,7 +205,7 @@ with col_title:
 
 st.divider()
 
-# 6. Excel/CSV Import
+# 7. Excel/CSV Import
 st.markdown("### 📂 Raw Excel / CSV Import (Data Preserved)")
 uploaded_file = st.file_uploader(
     "Upload fresh Excel file to replace or update active queue", 
@@ -224,7 +226,7 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"❌ File loading failed: {e}")
 
-# 7. Live 4K Dynamic Counters
+# 8. Live 4K Dynamic Counters
 df = st.session_state['crm_data']
 total_records = len(df)
 pending_records = total_records - (st.session_state['sent_count'] + st.session_state['failed_count'])
@@ -243,7 +245,7 @@ with c4:
 
 st.markdown("---")
 
-# 8. Live Editable Data Table Grid
+# 9. Live Editable Data Table Grid
 st.markdown(f"### ✏️ Interactive Live Grid ({len(df)} Records Ready)")
 st.caption("💡 Tip: Double click any cell to instantly modify details.")
 
@@ -258,7 +260,7 @@ edited_df = st.data_editor(
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 9. Smart Dispatch Engine
+# 10. Smart Dispatch Engine
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -298,80 +300,102 @@ if start_btn:
 
                 row = df.iloc[idx]
 
-                # Strict Mapping for Each Specific Column
-                cust_name = get_column_data(row, ["Name", "Customer Name", "Client Name"], "Customer")
-                target_email = get_column_data(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
-                inv_no = get_column_data(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
-                inv_date = get_column_data(row, ["Invoice Date", "Inv Date", "Date Of Invoice"], "N/A")
-                disp_date = get_column_data(row, ["Dispatch Date", "Dispatch_Date", "Disp Date"], "N/A")
-                transporter_val = get_column_data(row, ["Transporter Name", "Transporter", "Transporter_Name", "Courier", "Transport"], "N/A")
-                qty = get_column_data(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity"], "N/A")
-                cases = get_column_data(row, ["Number of Case", "Cases", "Case Qty"], "N/A")
-                amount_val = get_column_data(row, ["Amount", "Total Amount", "Bill Amount"], "N/A")
+                # Guaranteed Extraction logic for all fields
+                cust_name = extract_value_bulletproof(row, ["Name", "Customer Name", "Client Name", "Customer"], "Customer")
+                target_email = extract_value_bulletproof(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
+                inv_no = extract_value_bulletproof(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
+                inv_date = extract_value_bulletproof(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date"], "N/A")
+                disp_date = extract_value_bulletproof(row, ["Dispatch Date", "Dispatch_Date", "Disp Date", "Dispatching Date"], "N/A")
+                
+                # Broad Match for Transporter Name
+                transporter_val = extract_value_bulletproof(row, ["Transporter Name", "Transporter", "Transporter_Name", "Courier", "Transport", "Logistics", "Carrier"], "N/A")
+                
+                qty = extract_value_bulletproof(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity", "Stock"], "N/A")
+                cases = extract_value_bulletproof(row, ["Number of Case", "Cases", "Case Qty", "No of Cases", "Number of Cases"], "N/A")
+                amount_val = extract_value_bulletproof(row, ["Amount", "Total Amount", "Bill Amount", "Inv Amount"], "N/A")
 
                 if "@" in target_email:
                     msg = MIMEMultipart('alternative')
                     msg['From'] = sender_email
                     msg['To'] = target_email
-                    msg['Subject'] = f"🚀 Dispatch Invoice Notice - #{inv_no}"
+                    msg['Subject'] = f"🚀 RAMA ENTERPRISES - Dispatch Invoice Notice #{inv_no}"
 
-                    # Email Body with Dynamic Dark Glassmorphic Visual UI Design
+                    # Email Body with 4K Dynamic UI & 3-Sec Floating Dynamic RAMA ENTERPRISES Intro
                     body_html = f"""
                     <!DOCTYPE html>
                     <html>
                     <head>
                       <meta charset="utf-8">
                       <style>
+                        @keyframes bannerFade {{
+                          0% {{ opacity: 1; transform: scale(1.08); filter: drop-shadow(0 0 20px #38bdf8); }}
+                          80% {{ opacity: 1; transform: scale(1); filter: drop-shadow(0 0 10px #c084fc); }}
+                          100% {{ opacity: 1; transform: scale(1); }}
+                        }}
+                        
                         body {{
-                          margin: 0; padding: 0; background-color: #0b0f19; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f1f5f9;
+                          margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc;
                         }}
                         .email-container {{
-                          max-width: 650px; margin: 30px auto; background: #111827; border: 1px solid #3b82f6; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+                          max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25);
                         }}
-                        .header-banner {{
-                          background: linear-gradient(135deg, #4f46e5, #7c3aed, #db2777); padding: 30px 20px; text-align: center;
+                        .company-intro-banner {{
+                          background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065);
+                          padding: 28px 15px;
+                          text-align: center;
+                          border-bottom: 2px solid #38bdf8;
+                          animation: bannerFade 3s ease-in-out;
                         }}
-                        .header-banner h1 {{
-                          margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+                        .company-name-text {{
+                          font-size: 32px;
+                          font-weight: 900;
+                          letter-spacing: 2px;
+                          background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
+                          -webkit-background-clip: text;
+                          -webkit-text-fill-color: transparent;
+                          margin: 0;
+                          text-transform: uppercase;
                         }}
-                        .header-banner p {{
-                          margin: 5px 0 0 0; color: #e0e7ff; font-size: 14px;
+                        .company-tagline {{
+                          color: #94a3b8; font-size: 13px; font-weight: 600; letter-spacing: 1px; margin-top: 4px;
                         }}
                         .content-body {{
                           padding: 25px;
                         }}
                         .data-table {{
-                          width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937;
+                          width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #334155;
                         }}
                         .data-table td {{
-                          padding: 14px 18px; border-bottom: 1px solid #1f2937; font-size: 14px;
+                          padding: 14px 18px; border-bottom: 1px solid #1e293b; font-size: 14px;
                         }}
                         .data-table tr:last-child td {{
                           border-bottom: none;
                         }}
                         .label-col {{
-                          background-color: #1f2937; color: #9ca3af; font-weight: 600; width: 40%;
+                          background-color: #1e293b; color: #94a3b8; font-weight: 700; width: 42%;
                         }}
                         .value-col {{
-                          background-color: #111827; color: #38bdf8; font-weight: 700;
+                          background-color: #0f172a; color: #38bdf8; font-weight: 800;
                         }}
                         .highlight-val {{
                           color: #4ade80 !important; font-size: 16px;
                         }}
                         .footer-note {{
-                          text-align: center; padding: 18px; background-color: #0f172a; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b;
+                          text-align: center; padding: 18px; background-color: #020617; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b;
                         }}
                       </style>
                     </head>
                     <body>
                       <div class="email-container">
-                        <div class="header-banner">
-                          <h1>Dispatch Notification</h1>
-                          <p>CRM Pro Automated Dispatch Tracking System</p>
+                        <!-- 3-Second Dynamic Floating Company Header -->
+                        <div class="company-intro-banner">
+                          <h1 class="company-name-text">RAMA ENTERPRISES</h1>
+                          <div class="company-tagline">✨ Premium Automated CRM Dispatch System ✨</div>
                         </div>
+
                         <div class="content-body">
-                          <p style="font-size: 16px; color: #f8fafc;">Dear <b style="color: #a855f7;">{cust_name}</b>,</p>
-                          <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your shipment has been successfully processed and dispatched. Below are the complete invoice and dispatch details:</p>
+                          <p style="font-size: 16px; color: #f8fafc;">Dear <b style="color: #c084fc;">{cust_name}</b>,</p>
+                          <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your consignment has been dispatched successfully. Here are your details:</p>
                           
                           <table class="data-table">
                             <tr>
@@ -404,10 +428,10 @@ if start_btn:
                             </tr>
                           </table>
 
-                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business!</p>
+                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES!</p>
                         </div>
                         <div class="footer-note">
-                          ⚡ Generated by CRM Pro Bulk Dispatcher 4K • Confidential Notice
+                          ⚡ Powered by RAMA ENTERPRISES • 4K Dynamic Dispatcher
                         </div>
                       </div>
                     </body>
