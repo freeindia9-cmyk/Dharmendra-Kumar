@@ -98,6 +98,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Helper function to intelligently extract cell data despite column name variations
+def get_field_value(row, possible_keys, default_val="N/A"):
+    for key in possible_keys:
+        for col in row.index:
+            if str(col).strip().lower() == str(key).strip().lower():
+                val = str(row[col]).strip()
+                if val and val.lower() != "nan" and val.lower() != "none":
+                    return val
+    return default_val
+
 # 3. Default 100 Sample Customer Records Generator
 @st.cache_data
 def load_default_100_records():
@@ -214,9 +224,9 @@ with c4:
 
 st.markdown("---")
 
-# 8. Live Editable Table (Interactive Editor)
+# 8. Live Editable Table
 st.markdown(f"### ✏️ Live Editable Dispatch Records ({len(df)} Records Available)")
-st.caption("💡 Tip: Aap kisi bhi cell par double click karke detail change/add kar sakte hain (e.g., apna real email id test karne ke liye).")
+st.caption("💡 Tip: Double-click any cell to edit details before sending.")
 
 edited_df = st.data_editor(
     st.session_state['crm_data'],
@@ -229,7 +239,7 @@ edited_df = st.data_editor(
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 9. Real SMTP Engine with Stop Button
+# 9. Smart Dynamic Data Extraction Engine
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -268,13 +278,21 @@ if start_btn:
                     break
 
                 row = df.iloc[idx]
-                target_email = str(row.get('Email', '')).strip()
+                
+                # Smart extraction of column values
+                cust_name = get_field_value(row, ["Name", "Customer Name", "Client Name"], "Customer")
+                target_email = get_field_value(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
+                inv_no = get_field_value(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
+                disp_date = get_field_value(row, ["Dispatch Date", "Dispatch_Date", "Date"], "N/A")
+                transporter = get_field_value(row, ["Transporter Name", "Transporter", "Transporter_Name", "Courier"], "N/A")
+                qty = get_field_value(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity"], "N/A")
+                cases = get_field_value(row, ["Number of Case", "Cases", "Case Qty"], "N/A")
 
                 if "@" in target_email:
                     msg = MIMEMultipart('alternative')
                     msg['From'] = sender_email
                     msg['To'] = target_email
-                    msg['Subject'] = f"Dispatch Invoice Update - #{row.get('Invoice Number', 'N/A')}"
+                    msg['Subject'] = f"Dispatch Invoice Update - #{inv_no}"
 
                     body_html = f"""
                     <html>
@@ -283,24 +301,24 @@ if start_btn:
                           <h2 style="color: #4f46e5; margin-bottom: 5px;">Dispatch Update Notification</h2>
                           <p style="color: #64748b; font-size: 14px;">Automated Dispatch Notice</p>
                           <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 15px 0;">
-                          <p>Dear <b>{row.get('Name', 'Customer')}</b>,</p>
-                          <p>Your dispatch shipment details have been generated successfully:</p>
+                          <p>Dear <b>{cust_name}</b>,</p>
+                          <p>Your dispatch shipment details have been updated successfully:</p>
                           <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
                             <tr style="background-color: #f8fafc;">
                               <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>Invoice Number</b></td>
-                              <td style="padding: 10px; border: 1px solid #cbd5e1;">{row.get('Invoice Number', 'N/A')}</td>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>{inv_no}</b></td>
                             </tr>
                             <tr>
                               <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>Dispatch Date</b></td>
-                              <td style="padding: 10px; border: 1px solid #cbd5e1;">{row.get('Dispatch Date', 'N/A')}</td>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>{disp_date}</b></td>
                             </tr>
                             <tr style="background-color: #f8fafc;">
                               <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>Transporter</b></td>
-                              <td style="padding: 10px; border: 1px solid #cbd5e1;">{row.get('Transporter Name', 'N/A')}</td>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>{transporter}</b></td>
                             </tr>
                             <tr>
                               <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>Quantity / Cases</b></td>
-                              <td style="padding: 10px; border: 1px solid #cbd5e1;">{row.get('Stock Qty', 'N/A')} ({row.get('Number of Case', 'N/A')} Cases)</td>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>{qty} ({cases} Cases)</b></td>
                             </tr>
                           </table>
                           <p style="margin-top: 20px;">Thank you for your business!</p>
@@ -315,7 +333,7 @@ if start_btn:
                     try:
                         server.sendmail(sender_email, target_email, msg.as_string())
                         st.session_state['sent_count'] += 1
-                        status_box.markdown(f"✅ Mail Sent to: **{row.get('Name', 'Customer')}** (`{target_email}`) | Invoice: `{row.get('Invoice Number', 'N/A')}`")
+                        status_box.markdown(f"✅ Mail Sent to: **{cust_name}** (`{target_email}`) | Invoice: `{inv_no}`")
                     except Exception as send_err:
                         st.session_state['failed_count'] += 1
                         status_box.markdown(f"❌ Failed sending to: `{target_email}`")
