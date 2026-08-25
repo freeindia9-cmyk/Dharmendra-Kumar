@@ -197,23 +197,22 @@ st.markdown("### 📊 Live Processing Counters")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-  # 9. Start & Stop Dispatching Controls
-if 'stop_dispatch' not in st.session_state:
-    st.session_state['stop_dispatch'] = False
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Total Queue</div><div class="metric-value">{len(df)}</div></div>', unsafe_allow_html=True)
+with c2:
+    st.markdown('<div class="metric-card"><div class="metric-title">Sent Success</div><div class="metric-value" style="color:#4ade80;">0</div></div>', unsafe_allow_html=True)
+with c3:
+    st.markdown('<div class="metric-card"><div class="metric-title">Failed Bounces</div><div class="metric-value" style="color:#f87171;">0</div></div>', unsafe_allow_html=True)
+with c4:
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Pending</div><div class="metric-value" style="color:#fbbf24;">{len(df)}</div></div>', unsafe_allow_html=True)
 
-col_start, col_stop = st.columns([2, 1])
+st.markdown("---")
 
-with col_start:
-    start_btn = st.button("🚀 Start Bulk Email Dispatching", type="primary", use_container_width=True)
+# 8. Data Preview Table (100 Rows & 9 Columns)
+st.markdown(f"### 📋 Dispatch Records Preview ({len(df)} Records Available)")
+st.dataframe(df, use_container_width=True, height=380)
 
-with col_stop:
-    stop_btn = st.button("🛑 Stop Dispatching", use_container_width=True)
-
-if stop_btn:
-    st.session_state['stop_dispatch'] = True
-
-if start_btn:
-    st.session_state['stop_dispatch'] = False
+# 9. Start Dispatching with Live Progress Bar & Balloons
+if st.button("🚀 Start Bulk Email Dispatching", type="primary"):
     if not sender_email or not app_password:
         st.warning("⚠️ Kripya sidebar me Sender Email aur App Password fill karein.")
     else:
@@ -223,16 +222,11 @@ if start_btn:
         status_box = st.empty()
 
         for idx in range(len(df)):
-            if st.session_state['stop_dispatch']:
-                st.error("🛑 Email dispatching process ko beech me hi rok diya gaya hai!")
-                break
-
             row = df.iloc[idx]
             time.sleep(dispatch_delay / 4)
             pct = (idx + 1) / len(df)
             progress_bar.progress(pct)
             status_box.markdown(f"📩 Sending to: **{row.get('Name', 'Customer')}** (`{row.get('Email', 'N/A')}`) | Invoice: `{row.get('Invoice Number', 'N/A')}` ({idx+1}/{len(df)})")
 
-        if not st.session_state['stop_dispatch']:
-            st.balloons()
-            st.success("🎉 All bulk dispatch emails processed successfully!")
+        st.balloons()
+        st.success("🎉 All bulk dispatch emails processed successfully!")
