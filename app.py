@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import random
+import re
 
 # 1. Ultra 4K Page Configuration
 st.set_page_config(
@@ -108,14 +109,28 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Smart Robust Helper Function for Column Value Extraction
-def get_field_value(row, possible_keys, default_val="N/A"):
-    for key in possible_keys:
-        for col in row.index:
-            if str(col).strip().lower() == str(key).strip().lower():
+# Advanced Fuzzy Column Extractor Engine (Guarantees zero N/A for filled columns)
+def extract_smart_field(row, search_keywords, default_val="N/A"):
+    # Normalize keywords
+    keywords_clean = [re.sub(r'[^a-zA-Z0-9]', '', str(k)).lower() for k in search_keywords]
+    
+    # 1st Pass: Direct Clean Match
+    for col in row.index:
+        col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
+        if col_clean in keywords_clean:
+            val = str(row[col]).strip()
+            if val and val.lower() not in ["nan", "none", "n/a", ""]:
+                return val
+                
+    # 2nd Pass: Partial Keyword Inclusion Match
+    for col in row.index:
+        col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
+        for kw in keywords_clean:
+            if kw in col_clean or col_clean in kw:
                 val = str(row[col]).strip()
-                if val and val.lower() != "nan" and val.lower() != "none":
+                if val and val.lower() not in ["nan", "none", "n/a", ""]:
                     return val
+                    
     return default_val
 
 # 3. Default 100 Sample Customer Records Generator
@@ -289,14 +304,21 @@ if start_btn:
 
                 row = df.iloc[idx]
 
-                # Intelligent Column Value Fetching (Solves Transporter & Invoice Blank Issue)
-                cust_name = get_field_value(row, ["Name", "Customer Name", "Client Name"], "Customer")
-                target_email = get_field_value(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
-                inv_no = get_field_value(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
-                disp_date = get_field_value(row, ["Dispatch Date", "Dispatch_Date", "Date"], "N/A")
-                transporter_val = get_field_value(row, ["Transporter Name", "Transporter", "Transporter_Name", "Courier", "Transport"], "N/A")
-                qty = get_field_value(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity"], "N/A")
-                cases = get_field_value(row, ["Number of Case", "Cases", "Case Qty"], "N/A")
+                # Guaranteed Fuzzy Extraction for all Fields
+                cust_name = extract_smart_field(row, ["Name", "Customer Name", "Client Name", "Customer"], "Customer")
+                target_email = extract_smart_field(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
+                inv_no = extract_smart_field(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice", "Inv_No"], "N/A")
+                disp_date = extract_smart_field(row, ["Dispatch Date", "Dispatch_Date", "Date", "Disp Date"], "N/A")
+                
+                # Broadest matching keywords for Transporter Name
+                transporter_val = extract_smart_field(
+                    row, 
+                    ["Transporter Name", "Transporter", "Transporter_Name", "Courier", "Transport", "Transporter_Name", "Logistics", "Carrier"], 
+                    "N/A"
+                )
+                
+                qty = extract_smart_field(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity", "Stock"], "N/A")
+                cases = extract_smart_field(row, ["Number of Case", "Cases", "Case Qty", "Case"], "N/A")
 
                 if "@" in target_email:
                     msg = MIMEMultipart('alternative')
