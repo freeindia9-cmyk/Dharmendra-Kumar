@@ -314,73 +314,85 @@ if start_btn:
                     msg['To'] = target_email
                     msg['Subject'] = f"🚀 RAMA ENTERPRISES Abbott India Ltd - Dispatch Notice #{inv_no}"
 
-                    # Email HTML Template Optimized for Universal Email Clients
+                    # Email HTML Template - Restored Original Glowing Multi-Color Header & Enhanced UI
                     body_html = f"""
                     <!DOCTYPE html>
                     <html>
-                    <body style="margin: 0; padding: 0; background-color: #020617; font-family: Arial, sans-serif;">
-                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #020617; padding: 20px 0;">
+                    <head>
+                      <meta charset="utf-8">
+                      <style>
+                        @keyframes shimmerGrad {{
+                          0% {{ background-position: 0% 50%; }}
+                          50% {{ background-position: 100% 50%; }}
+                          100% {{ background-position: 0% 50%; }}
+                        }}
+                      </style>
+                    </head>
+                    <body style="margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #020617; padding: 25px 0;">
                         <tr>
                           <td align="center">
-                            <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #0f172a; border: 2px solid #38bdf8; border-radius: 16px; overflow: hidden; box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);">
+                            <table role="presentation" width="620" cellspacing="0" cellpadding="0" style="background-color: #0f172a; border: 2px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.35);">
                               
-                              <!-- High Visibility Glowing Header (Universal Compatible) -->
+                              <!-- Original Vibrant Dynamic Header with Multicoloured Glow -->
                               <tr>
-                                <td style="background: linear-gradient(135deg, #020617, #1e1b4b); padding: 25px 15px; text-align: center; border-bottom: 2px solid #38bdf8;">
-                                  <div style="font-size: 26px; font-weight: 900; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 12px #38bdf8;">
-                                    RAMA ENTERPRISES
-                                  </div>
-                                  <div style="font-size: 15px; font-weight: 700; color: #c084fc; letter-spacing: 1px; margin-top: 6px;">
-                                    Abbott India Ltd, Patna
+                                <td style="background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065); padding: 32px 20px; text-align: center; border-bottom: 2px solid #38bdf8;">
+                                  <div style="display: inline-block;">
+                                    <h1 style="font-size: 28px; font-weight: 900; letter-spacing: 2px; margin: 0; text-transform: uppercase; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #38bdf8; text-shadow: 0 0 18px rgba(56, 189, 248, 0.6);">
+                                      RAMA ENTERPRISES
+                                    </h1>
+                                    <div style="font-size: 15px; font-weight: 800; color: #38bdf8; letter-spacing: 1.5px; margin-top: 8px; text-transform: uppercase; text-shadow: 0 0 10px rgba(192, 132, 252, 0.5);">
+                                      Abbott India Ltd, Patna
+                                    </div>
                                   </div>
                                 </td>
                               </tr>
 
                               <!-- Content Body -->
                               <tr>
-                                <td style="padding: 25px; color: #f8fafc;">
-                                  <p style="font-size: 16px; margin-top: 0;">Dear <b style="color: #38bdf8;">{cust_name}</b>,</p>
-                                  <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your consignment has been dispatched. Here are your shipment details:</p>
+                                <td style="padding: 28px; color: #f8fafc;">
+                                  <p style="font-size: 16px; margin-top: 0; color: #f8fafc;">Dear <b style="color: #c084fc; font-size: 17px;">{cust_name}</b>,</p>
+                                  <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">Your consignment has been dispatched successfully. Below are your invoice & shipment details:</p>
                                   
-                                  <table width="100%" cellspacing="0" cellpadding="10" style="margin-top: 15px; border-collapse: collapse; border: 1px solid #334155; border-radius: 8px;">
+                                  <table width="100%" cellspacing="0" cellpadding="12" style="margin-top: 20px; border-collapse: separate; border-spacing: 0; border: 1px solid #334155; border-radius: 12px; overflow: hidden;">
                                     <tr style="background-color: #1e293b;">
-                                      <td width="40%" style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">📄 Invoice Number</td>
-                                      <td style="color: #818cf8; font-weight: bold; border-bottom: 1px solid #334155;">{inv_no}</td>
+                                      <td width="42%" style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">📄 Invoice Number</td>
+                                      <td style="color: #818cf8; font-weight: 800; border-bottom: 1px solid #334155; font-size: 15px;">{inv_no}</td>
                                     </tr>
                                     <tr style="background-color: #0f172a;">
                                       <td style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">📅 Invoice Date</td>
-                                      <td style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155;">{inv_date}</td>
+                                      <td style="color: #38bdf8; font-weight: 700; border-bottom: 1px solid #334155;">{inv_date}</td>
                                     </tr>
                                     <tr style="background-color: #1e293b;">
                                       <td style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">🚚 Dispatch Date</td>
-                                      <td style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155;">{disp_date}</td>
+                                      <td style="color: #38bdf8; font-weight: 700; border-bottom: 1px solid #334155;">{disp_date}</td>
                                     </tr>
                                     <tr style="background-color: #0f172a;">
-                                      <td style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">🚛 Transporter</td>
-                                      <td style="color: #f472b6; font-weight: bold; border-bottom: 1px solid #334155;">{transporter_val}</td>
+                                      <td style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">🚛 Transporter Name</td>
+                                      <td style="color: #f472b6; font-weight: 800; border-bottom: 1px solid #334155;">{transporter_val}</td>
                                     </tr>
                                     <tr style="background-color: #1e293b;">
                                       <td style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">📦 Stock Quantity</td>
-                                      <td style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155;">{qty}</td>
+                                      <td style="color: #38bdf8; font-weight: 700; border-bottom: 1px solid #334155;">{qty}</td>
                                     </tr>
                                     <tr style="background-color: #0f172a;">
-                                      <td style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">🧰 Cases</td>
-                                      <td style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155;">{cases} Cases</td>
+                                      <td style="color: #94a3b8; font-weight: bold; border-bottom: 1px solid #334155;">🧰 Number of Cases</td>
+                                      <td style="color: #38bdf8; font-weight: 700; border-bottom: 1px solid #334155;">{cases} Cases</td>
                                     </tr>
                                     <tr style="background-color: #1e293b;">
                                       <td style="color: #94a3b8; font-weight: bold;">💰 Invoice Amount</td>
-                                      <td style="color: #4ade80; font-weight: bold; font-size: 16px;">{amount_val}</td>
+                                      <td style="color: #4ade80; font-weight: 900; font-size: 17px;">{amount_val}</td>
                                     </tr>
                                   </table>
 
-                                  <p style="margin-top: 20px; color: #94a3b8; font-size: 13px;">Thank you for working with RAMA ENTERPRISES Abbott India Ltd, Patna!</p>
+                                  <p style="margin-top: 25px; color: #94a3b8; font-size: 13px; line-height: 1.5;">Thank you for your business with <b>RAMA ENTERPRISES Abbott India Ltd, Patna</b>!</p>
                                 </td>
                               </tr>
 
                               <!-- Footer -->
                               <tr>
-                                <td style="text-align: center; padding: 15px; background-color: #020617; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b;">
-                                  ⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna
+                                <td style="text-align: center; padding: 18px; background-color: #020617; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b;">
+                                  ⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna • Automated 4K Dispatcher
                                 </td>
                               </tr>
                             </table>
