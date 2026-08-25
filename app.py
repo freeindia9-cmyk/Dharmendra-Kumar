@@ -16,36 +16,50 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. 4K Ultra Web CSS Styling
+# 2. Ultra-Futuristic Cyber Ambient CSS Styling
 st.markdown("""
 <style>
+    /* Animated Deep Space Ambient Background */
     .stApp {
-        background: linear-gradient(-45deg, #020617, #0f172a, #1e1b4b, #2e1065, #020617);
-        background-size: 400% 400%;
-        animation: gradientBG 12s ease infinite;
+        background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
         color: #f8fafc;
-        font-family: 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Segoe UI', Inter, system-ui, -apple-system, sans-serif;
     }
 
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    /* Ambient Dynamic Moving Light Overlay */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, rgba(168, 85, 247, 0.05) 40%, transparent 70%);
+        animation: rotateAmbient 20s linear infinite;
+        pointer-events: none;
+        z-index: 0;
     }
 
+    @keyframes rotateAmbient {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Holographic Floating Header */
     .floating-header {
-        background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
+        background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6, #38bdf8);
         background-size: 300% 300%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 48px;
+        font-size: 46px;
         font-weight: 900;
         letter-spacing: -1px;
-        animation: gradientShift 6s ease infinite, floatTitle 3s ease-in-out infinite;
+        animation: shimmer 5s ease infinite, floatTitle 3s ease-in-out infinite;
         margin-bottom: 0px;
+        text-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
     }
 
-    @keyframes gradientShift {
+    @keyframes shimmer {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
@@ -57,76 +71,81 @@ st.markdown("""
         100% { transform: translateY(0px); }
     }
 
+    /* Logo Pulse Container */
     .logo-frame {
         display: inline-block;
-        padding: 8px;
+        padding: 10px;
         border-radius: 24px;
-        background: linear-gradient(135deg, #38bdf8, #c084fc, #f472b6);
-        animation: pulse4K 2.5s infinite alternate;
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(56, 189, 248, 0.5);
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.2);
+        animation: pulse4K 3s infinite alternate;
     }
 
     @keyframes pulse4K {
-        0% { transform: scale(0.97); box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        100% { transform: scale(1.03); box-shadow: 0 0 35px rgba(244, 114, 182, 0.9); }
+        0% { border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+        50% { border-color: rgba(192, 132, 252, 0.8); box-shadow: 0 0 35px rgba(192, 132, 252, 0.6); }
+        100% { border-color: rgba(244, 114, 182, 0.9); box-shadow: 0 0 40px rgba(244, 114, 182, 0.7); }
     }
 
+    /* Glassmorphism Metric Cards */
     .metric-card {
-        background: rgba(15, 23, 42, 0.65);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 20px;
-        padding: 22px;
+        padding: 20px;
         text-align: center;
-        backdrop-filter: blur(16px);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .metric-card:hover {
-        transform: translateY(-8px) scale(1.02);
+        transform: translateY(-8px) scale(1.03);
         border-color: #38bdf8;
-        box-shadow: 0 15px 45px rgba(56, 189, 248, 0.35);
+        box-shadow: 0 15px 40px rgba(56, 189, 248, 0.3);
     }
 
     .metric-title {
-        font-size: 14px;
+        font-size: 13px;
         color: #94a3b8;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 1.5px;
     }
     .metric-value {
-        font-size: 36px;
+        font-size: 38px;
         font-weight: 900;
-        margin-top: 8px;
+        margin-top: 6px;
         background: linear-gradient(90deg, #38bdf8, #a855f7);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+
+    /* Custom Neon Glow for Buttons */
+    .stButton>button {
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        transition: all 0.3s ease !important;
+    }
+    .stButton>button:hover {
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.6) !important;
+        transform: translateY(-2px) !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Super Robust Value Extractor (Guaranteed Zero N/A Fix)
-def extract_value_bulletproof(row, target_keys, default_val="N/A"):
-    # Clean keys list
-    clean_target_keys = [re.sub(r'[^a-zA-Z0-9]', '', str(k)).lower() for k in target_keys]
+# 3. Strict Field Extractor (Prevents Column Name Swapping)
+def get_field_strict(row, column_aliases, default_val="N/A"):
+    aliases_clean = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
-    # 1st Pass: Clean string match
     for col in row.index:
-        clean_col = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
-        if clean_col in clean_target_keys:
+        col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
+        if col_clean in aliases_clean:
             val = str(row[col]).strip()
             if val and val.lower() not in ["nan", "none", "n/a", ""]:
                 return val
-
-    # 2nd Pass: Substring search (e.g. 'transporter' in 'transporter name')
-    for col in row.index:
-        clean_col = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
-        for tk in clean_target_keys:
-            if tk in clean_col or clean_col in tk:
-                val = str(row[col]).strip()
-                if val and val.lower() not in ["nan", "none", "n/a", ""]:
-                    return val
-
+                
     return default_val
 
 # 4. Default 100 Sample Customer Records Generator
@@ -197,11 +216,11 @@ with col_logo:
         st.image(logo_file, width=110)
         st.markdown('</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div class="logo-frame" style="font-size: 55px; padding: 12px 24px;">⚡</div>', unsafe_allow_html=True)
+        st.markdown('<div class="logo-frame" style="font-size: 55px; text-align: center; width: 80px;">⚡</div>', unsafe_allow_html=True)
 
 with col_title:
     st.markdown("<h1 class='floating-header'>CRM Pro Bulk Dispatcher 4K</h1>", unsafe_allow_html=True)
-    st.caption("✨ Ultra-Fast Automated Dispatcher with Dynamic UI Email Generator")
+    st.caption("✨ Ultra-Fast Automated Dispatcher with Dynamic Holographic UI")
 
 st.divider()
 
@@ -300,64 +319,64 @@ if start_btn:
 
                 row = df.iloc[idx]
 
-                # Guaranteed Extraction logic for all fields
-                cust_name = extract_value_bulletproof(row, ["Name", "Customer Name", "Client Name", "Customer"], "Customer")
-                target_email = extract_value_bulletproof(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
-                inv_no = extract_value_bulletproof(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
-                inv_date = extract_value_bulletproof(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date"], "N/A")
-                disp_date = extract_value_bulletproof(row, ["Dispatch Date", "Dispatch_Date", "Disp Date", "Dispatching Date"], "N/A")
-                
-                # Broad Match for Transporter Name
-                transporter_val = extract_value_bulletproof(row, ["Transporter Name", "Transporter", "Transporter_Name", "Courier", "Transport", "Logistics", "Carrier"], "N/A")
-                
-                qty = extract_value_bulletproof(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity", "Stock"], "N/A")
-                cases = extract_value_bulletproof(row, ["Number of Case", "Cases", "Case Qty", "No of Cases", "Number of Cases"], "N/A")
-                amount_val = extract_value_bulletproof(row, ["Amount", "Total Amount", "Bill Amount", "Inv Amount"], "N/A")
+                # Strict Mapping
+                cust_name = get_field_strict(row, ["Name", "Customer Name", "Client Name"], "Customer")
+                target_email = get_field_strict(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
+                inv_no = get_field_strict(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
+                inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date"], "N/A")
+                disp_date = get_field_strict(row, ["Dispatch Date", "Dispatch_Date", "Disp Date"], "N/A")
+                transporter_val = get_field_strict(row, ["Transporter Name", "Transporter_Name", "Transporter", "Courier"], "N/A")
+                qty = get_field_strict(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity"], "N/A")
+                cases = get_field_strict(row, ["Number of Case", "Cases", "Case Qty", "No of Cases"], "N/A")
+                amount_val = get_field_strict(row, ["Amount", "Total Amount", "Bill Amount"], "N/A")
 
                 if "@" in target_email:
                     msg = MIMEMultipart('alternative')
                     msg['From'] = sender_email
                     msg['To'] = target_email
-                    msg['Subject'] = f"🚀 RAMA ENTERPRISES - Dispatch Invoice Notice #{inv_no}"
+                    msg['Subject'] = f"🚀 RAMA ENTERPRISES Abbott India Ltd - Dispatch Notice #{inv_no}"
 
-                    # Email Body with 4K Dynamic UI & 3-Sec Floating Dynamic RAMA ENTERPRISES Intro
+                    # Email Body with 3-Sec Fade Effect for "RAMA ENTERPRISES Abbott India Ltd, Patna"
                     body_html = f"""
                     <!DOCTYPE html>
                     <html>
                     <head>
                       <meta charset="utf-8">
                       <style>
-                        @keyframes bannerFade {{
-                          0% {{ opacity: 1; transform: scale(1.08); filter: drop-shadow(0 0 20px #38bdf8); }}
-                          80% {{ opacity: 1; transform: scale(1); filter: drop-shadow(0 0 10px #c084fc); }}
-                          100% {{ opacity: 1; transform: scale(1); }}
+                        @keyframes textFadeIn3Sec {{
+                          0% {{ opacity: 0; transform: translateY(-12px) scale(0.95); filter: drop-shadow(0 0 15px #38bdf8); }}
+                          50% {{ opacity: 0.8; transform: translateY(0) scale(1.02); filter: drop-shadow(0 0 25px #c084fc); }}
+                          100% {{ opacity: 1; transform: translateY(0) scale(1); filter: drop-shadow(0 0 8px #38bdf8); }}
                         }}
                         
                         body {{
                           margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc;
                         }}
                         .email-container {{
-                          max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25);
+                          max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.3);
                         }}
                         .company-intro-banner {{
                           background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065);
                           padding: 28px 15px;
                           text-align: center;
                           border-bottom: 2px solid #38bdf8;
-                          animation: bannerFade 3s ease-in-out;
+                        }}
+                        .fade-text-effect {{
+                          animation: textFadeIn3Sec 3s ease-in-out forwards;
+                          display: inline-block;
                         }}
                         .company-name-text {{
-                          font-size: 32px;
+                          font-size: 26px;
                           font-weight: 900;
-                          letter-spacing: 2px;
+                          letter-spacing: 1.5px;
                           background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
                           -webkit-background-clip: text;
                           -webkit-text-fill-color: transparent;
                           margin: 0;
                           text-transform: uppercase;
                         }}
-                        .company-tagline {{
-                          color: #94a3b8; font-size: 13px; font-weight: 600; letter-spacing: 1px; margin-top: 4px;
+                        .company-location-text {{
+                          color: #38bdf8; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 6px;
                         }}
                         .content-body {{
                           padding: 25px;
@@ -387,15 +406,17 @@ if start_btn:
                     </head>
                     <body>
                       <div class="email-container">
-                        <!-- 3-Second Dynamic Floating Company Header -->
+                        <!-- 3-Second Fade-In Animated Company Header -->
                         <div class="company-intro-banner">
-                          <h1 class="company-name-text">RAMA ENTERPRISES</h1>
-                          <div class="company-tagline">✨ Premium Automated CRM Dispatch System ✨</div>
+                          <div class="fade-text-effect">
+                            <h1 class="company-name-text">RAMA ENTERPRISES</h1>
+                            <div class="company-location-text">Abbott India Ltd, Patna</div>
+                          </div>
                         </div>
 
                         <div class="content-body">
                           <p style="font-size: 16px; color: #f8fafc;">Dear <b style="color: #c084fc;">{cust_name}</b>,</p>
-                          <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your consignment has been dispatched successfully. Here are your details:</p>
+                          <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your consignment has been dispatched successfully. Below are your invoice & shipment details:</p>
                           
                           <table class="data-table">
                             <tr>
@@ -428,10 +449,10 @@ if start_btn:
                             </tr>
                           </table>
 
-                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES!</p>
+                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES Abbott India Ltd, Patna!</p>
                         </div>
                         <div class="footer-note">
-                          ⚡ Powered by RAMA ENTERPRISES • 4K Dynamic Dispatcher
+                          ⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna • Automated 4K Dispatcher
                         </div>
                       </div>
                     </body>
