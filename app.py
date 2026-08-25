@@ -8,15 +8,15 @@ from datetime import datetime, timedelta
 import random
 import re
 
-# 1. Ultra 4K Page Configuration
+# 1. Page Configuration
 st.set_page_config(
-    page_title="CRM Pro Bulk Dispatcher 4K Ultra",
+    page_title="DHARMENDRA KUMAR (MISHRA)",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 2. 4K Ultra Web CSS Styling
+# 2. Web CSS Styling
 st.markdown("""
 <style>
     .stApp {
@@ -33,16 +33,33 @@ st.markdown("""
         100% { background-position: 0% 50%; }
     }
 
+    .header-container {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
     .floating-header {
         background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
         background-size: 300% 300%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 48px;
+        font-size: 42px;
         font-weight: 900;
         letter-spacing: -1px;
         animation: gradientShift 6s ease infinite, floatTitle 3s ease-in-out infinite;
-        margin-bottom: 0px;
+        margin: 0;
+        display: inline-block;
+    }
+
+    .designer-tag {
+        font-size: 15px;
+        font-weight: 400 !important; /* Non-bold design */
+        color: #94a3b8;
+        letter-spacing: 1px;
+        opacity: 0.9;
+        display: inline-block;
     }
 
     @keyframes gradientShift {
@@ -105,12 +122,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Strict Target Extractor to Avoid Column Name Swapping
+# 3. Strict Target Extractor
 def get_field_strict(row, column_aliases, default_val="N/A"):
-    # Clean aliases
     aliases_clean = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
-    # Check exact clean column matches first
     for col in row.index:
         col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
         if col_clean in aliases_clean:
@@ -120,7 +135,7 @@ def get_field_strict(row, column_aliases, default_val="N/A"):
                 
     return default_val
 
-# 4. Default 100 Sample Customer Records Generator
+# 4. Default Records Generator
 @st.cache_data
 def load_default_100_records():
     names_list = [
@@ -167,7 +182,7 @@ if 'failed_count' not in st.session_state:
 
 # 5. Sidebar Controls
 with st.sidebar:
-    st.markdown("### 🖼️ 4K Branding Studio")
+    st.markdown("### 🖼️ Branding Studio")
     logo_file = st.file_uploader("Upload High-Res Logo", type=["png", "jpg", "jpeg"])
 
     st.divider()
@@ -191,7 +206,12 @@ with col_logo:
         st.markdown('<div class="logo-frame" style="font-size: 55px; padding: 12px 24px;">⚡</div>', unsafe_allow_html=True)
 
 with col_title:
-    st.markdown("<h1 class='floating-header'>CRM Pro Bulk Dispatcher 4K</h1>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="header-container">
+        <h1 class="floating-header">DHARMENDRA KUMAR (MISHRA)</h1>
+        <span class="designer-tag">MADE AND DESIGNED BY RAJVEER</span>
+    </div>
+    """, unsafe_allow_html=True)
     st.caption("✨ Ultra-Fast Automated Dispatcher with Dynamic UI Email Generator")
 
 st.divider()
@@ -217,12 +237,12 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"❌ File loading failed: {e}")
 
-# 8. Live 4K Dynamic Counters
+# 8. Live Counters
 df = st.session_state['crm_data']
 total_records = len(df)
 pending_records = total_records - (st.session_state['sent_count'] + st.session_state['failed_count'])
 
-st.markdown("### 📊 4K Live Processing Dashboard")
+st.markdown("### 📊 Live Processing Dashboard")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
@@ -236,7 +256,7 @@ with c4:
 
 st.markdown("---")
 
-# 9. Live Editable Data Table Grid
+# 9. Editable Data Grid
 st.markdown(f"### ✏️ Interactive Live Grid ({len(df)} Records Ready)")
 st.caption("💡 Tip: Double click any cell to instantly modify details.")
 
@@ -291,16 +311,12 @@ if start_btn:
 
                 row = df.iloc[idx]
 
-                # Strict Field Extractor (Fixes Interchanged Names)
                 cust_name = get_field_strict(row, ["Name", "Customer Name", "Client Name"], "Customer")
                 target_email = get_field_strict(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
                 inv_no = get_field_strict(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
                 inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date"], "N/A")
                 disp_date = get_field_strict(row, ["Dispatch Date", "Dispatch_Date", "Disp Date"], "N/A")
-                
-                # Transporter Name Strict Fetch (Distinct from Customer Name)
                 transporter_val = get_field_strict(row, ["Transporter Name", "Transporter_Name", "Transporter", "Courier"], "N/A")
-                
                 qty = get_field_strict(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity"], "N/A")
                 cases = get_field_strict(row, ["Number of Case", "Cases", "Case Qty", "No of Cases"], "N/A")
                 amount_val = get_field_strict(row, ["Amount", "Total Amount", "Bill Amount"], "N/A")
@@ -311,7 +327,6 @@ if start_btn:
                     msg['To'] = target_email
                     msg['Subject'] = f"🚀 RAMA ENTERPRISES Abbott India Ltd - Dispatch Notice #{inv_no}"
 
-                    # Email HTML Body with 3-Sec Fade Effect for "RAMA ENTERPRISES Abbott India Ltd, Patna"
                     body_html = f"""
                     <!DOCTYPE html>
                     <html>
@@ -381,7 +396,6 @@ if start_btn:
                     </head>
                     <body>
                       <div class="email-container">
-                        <!-- 3-Second Fade-In Animated Company Header -->
                         <div class="company-intro-banner">
                           <div class="fade-text-effect">
                             <h1 class="company-name-text">RAMA ENTERPRISES</h1>
@@ -427,7 +441,7 @@ if start_btn:
                           <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES Abbott India Ltd, Patna!</p>
                         </div>
                         <div class="footer-note">
-                          ⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna • Automated 4K Dispatcher
+                          ⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna • Automated Dispatcher
                         </div>
                       </div>
                     </body>
