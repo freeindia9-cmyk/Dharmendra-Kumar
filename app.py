@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import time
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import random
 
@@ -12,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Custom CSS (Floating & Pulsing Header, Glassmorphism, Logo Animations)
+# 2. Custom CSS (Floating Header, Pulsing Logo Frame, Glassmorphism Cards)
 st.markdown("""
 <style>
     /* Animated Gradient Background */
@@ -140,7 +143,13 @@ def load_default_100_records():
 if 'crm_data' not in st.session_state:
     st.session_state['crm_data'] = load_default_100_records()
 
-# 4. Sidebar Controls (Company Logo Upload & SMTP)
+# Live Counters State Initialization
+if 'sent_count' not in st.session_state:
+    st.session_state['sent_count'] = 0
+if 'failed_count' not in st.session_state:
+    st.session_state['failed_count'] = 0
+
+# 4. Sidebar Controls
 with st.sidebar:
     st.markdown("### 🖼️ Company Branding")
     logo_file = st.file_uploader("Upload Company Logo", type=["png", "jpg", "jpeg"])
@@ -150,9 +159,9 @@ with st.sidebar:
     st.markdown("### 🔑 SMTP Server Connection")
     smtp_server = st.text_input("SMTP Server", value="smtp.gmail.com")
     smtp_port = st.number_input("SMTP Port", value=587)
-    sender_email = st.text_input("Sender Email ID", placeholder="admin@company.com")
+    sender_email = st.text_input("Sender Email ID", placeholder="your_email@gmail.com")
     app_password = st.text_input("16-Digit App Password", type="password")
-    dispatch_delay = st.slider("Dispatch Rate Delay (Seconds)", 0.2, 3.0, 0.5)
+    dispatch_delay = st.slider("Dispatch Rate Delay (Seconds)", 0.5, 5.0, 1.0)
 
 # 5. Header Section with Animated Logo Frame
 col_logo, col_title = st.columns([1, 4])
@@ -186,32 +195,36 @@ if uploaded_file is not None:
         else:
             new_df = pd.read_excel(uploaded_file, engine='openpyxl')
         st.session_state['crm_data'] = new_df
+        st.session_state['sent_count'] = 0
+        st.session_state['failed_count'] = 0
         st.success(f"✅ Successfully imported {len(new_df)} records from file!")
     except Exception as e:
         st.error(f"❌ Error loading file: {e}")
 
 df = st.session_state['crm_data']
+total_records = len(df)
+pending_records = total_records - (st.session_state['sent_count'] + st.session_state['failed_count'])
 
 # 7. Live Counters Section
 st.markdown("### 📊 Live Processing Counters")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.markdown(f'<div class="metric-card"><div class="metric-title">Total Queue</div><div class="metric-value">{len(df)}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Total Queue</div><div class="metric-value">{total_records}</div></div>', unsafe_allow_html=True)
 with c2:
-    st.markdown('<div class="metric-card"><div class="metric-title">Sent Success</div><div class="metric-value" style="color:#4ade80;">0</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Sent Success</div><div class="metric-value" style="color:#4ade80;">{st.session_state["sent_count"]}</div></div>', unsafe_allow_html=True)
 with c3:
-    st.markdown('<div class="metric-card"><div class="metric-title">Failed Bounces</div><div class="metric-value" style="color:#f87171;">0</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Failed Bounces</div><div class="metric-value" style="color:#f87171;">{st.session_state["failed_count"]}</div></div>', unsafe_allow_html=True)
 with c4:
-    st.markdown(f'<div class="metric-card"><div class="metric-title">Pending</div><div class="metric-value" style="color:#fbbf24;">{len(df)}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Pending</div><div class="metric-value" style="color:#fbbf24;">{max(0, pending_records)}</div></div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
-# 8. Data Preview Table (100 Rows & 9 Columns)
+# 8. Data Preview Table
 st.markdown(f"### 📋 Dispatch Records Preview ({len(df)} Records Available)")
 st.dataframe(df, use_container_width=True, height=380)
 
-# 9. Start & Stop Dispatching Controls
+# 9. Real SMTP Bulk Email Dispatching Logic with Stop Control
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -228,25 +241,92 @@ if stop_btn:
 
 if start_btn:
     st.session_state['stop_dispatch'] = False
+    st.session_state['sent_count'] = 0
+    st.session_state['failed_count'] = 0
+
     if not sender_email or not app_password:
-        st.warning("⚠️ Kripya sidebar me Sender Email aur App Password fill karein.")
+        st.warning("⚠️ Kripya sidebar me Sender Email ID aur 16-digit App Password enter karein!")
     else:
         st.markdown("---")
         st.markdown("### 📡 Live Progress Monitor")
         progress_bar = st.progress(0)
         status_box = st.empty()
 
-        for idx in range(len(df)):
-            if st.session_state['stop_dispatch']:
-                st.error("🛑 Email dispatching process ko beech me hi rok diya gaya hai!")
-                break
+        try:
+            # Login to SMTP Server
+            server = smtplib.SMTP(smtp_server, int(smtp_port))
+            server.starttls()
+            server.login(sender_email, app_password)
 
-            row = df.iloc[idx]
-            time.sleep(dispatch_delay / 4)
-            pct = (idx + 1) / len(df)
-            progress_bar.progress(pct)
-            status_box.markdown(f"📩 Sending to: **{row.get('Name', 'Customer')}** (`{row.get('Email', 'N/A')}`) | Invoice: `{row.get('Invoice Number', 'N/A')}` ({idx+1}/{len(df)})")
+            for idx in range(len(df)):
+                if st.session_state['stop_dispatch']:
+                    st.error("🛑 Dispatching process manually stopped by user!")
+                    break
 
-        if not st.session_state['stop_dispatch']:
-            st.balloons()
-            st.success("🎉 All bulk dispatch emails processed successfully!")
+                row = df.iloc[idx]
+                target_email = str(row.get('Email', '')).strip()
+
+                if "@" in target_email:
+                    msg = MIMEMultipart('alternative')
+                    msg['From'] = sender_email
+                    msg['To'] = target_email
+                    msg['Subject'] = f"Dispatch Invoice Update - #{row.get('Invoice Number', 'N/A')}"
+
+                    # HTML Template for High Deliverability (Primary Inbox Landing)
+                    body_html = f"""
+                    <html>
+                      <body style="font-family: Arial, sans-serif; color: #1e293b; line-height: 1.6;">
+                        <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+                          <h2 style="color: #4f46e5; margin-bottom: 5px;">Dispatch Update Notification</h2>
+                          <p style="color: #64748b; font-size: 14px;">Automated Dispatch Notice</p>
+                          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 15px 0;">
+                          <p>Dear <b>{row.get('Name', 'Customer')}</b>,</p>
+                          <p>Your dispatch shipment details have been generated successfully:</p>
+                          <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                            <tr style="background-color: #f8fafc;">
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>Invoice Number</b></td>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;">{row.get('Invoice Number', 'N/A')}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>Dispatch Date</b></td>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;">{row.get('Dispatch Date', 'N/A')}</td>
+                            </tr>
+                            <tr style="background-color: #f8fafc;">
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>Transporter</b></td>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;">{row.get('Transporter Name', 'N/A')}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;"><b>Quantity / Cases</b></td>
+                              <td style="padding: 10px; border: 1px solid #cbd5e1;">{row.get('Stock Qty', 'N/A')} ({row.get('Number of Case', 'N/A')} Cases)</td>
+                            </tr>
+                          </table>
+                          <p style="margin-top: 20px;">Thank you for your business!</p>
+                          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 20px;">
+                          <p style="font-size: 11px; color: #94a3b8; text-align: center;">This is an automated system dispatch email.</p>
+                        </div>
+                      </body>
+                    </html>
+                    """
+                    msg.attach(MIMEText(body_html, 'html'))
+
+                    try:
+                        server.sendmail(sender_email, target_email, msg.as_string())
+                        st.session_state['sent_count'] += 1
+                        status_box.markdown(f"✅ Mail Sent to: **{row.get('Name', 'Customer')}** (`{target_email}`) | Invoice: `{row.get('Invoice Number', 'N/A')}`")
+                    except Exception as send_err:
+                        st.session_state['failed_count'] += 1
+                        status_box.markdown(f"❌ Failed sending to: `{target_email}`")
+                else:
+                    st.session_state['failed_count'] += 1
+
+                pct = (idx + 1) / len(df)
+                progress_bar.progress(pct)
+                time.sleep(dispatch_delay)
+
+            server.quit()
+            if not st.session_state['stop_dispatch']:
+                st.balloons()
+                st.success("🎉 All bulk dispatch emails processed and dispatched successfully!")
+
+        except Exception as smtp_err:
+            st.error(f"❌ SMTP Server Connection Error: {smtp_err}. Please check your Sender Email ID and 16-digit App Password.")
