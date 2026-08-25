@@ -211,8 +211,23 @@ st.markdown("---")
 st.markdown(f"### 📋 Dispatch Records Preview ({len(df)} Records Available)")
 st.dataframe(df, use_container_width=True, height=380)
 
-# 9. Start Dispatching with Live Progress Bar & Balloons
-if st.button("🚀 Start Bulk Email Dispatching", type="primary"):
+# 9. Start & Stop Dispatching Controls
+if 'stop_dispatch' not in st.session_state:
+    st.session_state['stop_dispatch'] = False
+
+col_start, col_stop = st.columns([2, 1])
+
+with col_start:
+    start_btn = st.button("🚀 Start Bulk Email Dispatching", type="primary", use_container_width=True)
+
+with col_stop:
+    stop_btn = st.button("🛑 Stop Dispatching", use_container_width=True)
+
+if stop_btn:
+    st.session_state['stop_dispatch'] = True
+
+if start_btn:
+    st.session_state['stop_dispatch'] = False
     if not sender_email or not app_password:
         st.warning("⚠️ Kripya sidebar me Sender Email aur App Password fill karein.")
     else:
@@ -222,11 +237,16 @@ if st.button("🚀 Start Bulk Email Dispatching", type="primary"):
         status_box = st.empty()
 
         for idx in range(len(df)):
+            if st.session_state['stop_dispatch']:
+                st.error("🛑 Email dispatching process ko beech me hi rok diya gaya hai!")
+                break
+
             row = df.iloc[idx]
             time.sleep(dispatch_delay / 4)
             pct = (idx + 1) / len(df)
             progress_bar.progress(pct)
             status_box.markdown(f"📩 Sending to: **{row.get('Name', 'Customer')}** (`{row.get('Email', 'N/A')}`) | Invoice: `{row.get('Invoice Number', 'N/A')}` ({idx+1}/{len(df)})")
 
-        st.balloons()
-        st.success("🎉 All bulk dispatch emails processed successfully!")
+        if not st.session_state['stop_dispatch']:
+            st.balloons()
+            st.success("🎉 All bulk dispatch emails processed successfully!")
