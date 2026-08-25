@@ -10,7 +10,7 @@ import re
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="DHARMENDRA KUMAR (MISHRA)",
+    page_title="DHARMENDRA KUMAR (MISHRA) - Bulk Dispatcher",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -55,7 +55,7 @@ st.markdown("""
 
     .designer-tag {
         font-size: 15px;
-        font-weight: 400 !important; /* Non-bold design */
+        font-weight: 400 !important;
         color: #94a3b8;
         letter-spacing: 1px;
         opacity: 0.9;
@@ -122,8 +122,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Strict Target Extractor
+# 3. Dynamic Column Extractor Logic
 def get_field_strict(row, column_aliases, default_val="N/A"):
+    # Strip spaces, underscores, hyphens for fuzzy header matching
     aliases_clean = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
     for col in row.index:
@@ -140,10 +141,7 @@ def get_field_strict(row, column_aliases, default_val="N/A"):
 def load_default_100_records():
     names_list = [
         "Aarav Sharma", "Priya Patel", "Rahul Verma", "Ananya Iyer", "Amit Gupta",
-        "Rohan Mehta", "Sneha Reddy", "Vikram Singh", "Pooja Joshi", "Karan Kapoor",
-        "Neha Nair", "Siddharth Rao", "Divya Agarwal", "Aditya Srivastava", "Kavya Deshmukh",
-        "Nikhil Jain", "Riya Malhotra", "Varun Kulkarni", "Meera Pillai", "Gaurav Pandey",
-        "Tanya Saxena", "Manish Choudhary", "Ishita Bhat", "Sanjay Menon", "Anusha Das"
+        "Rohan Mehta", "Sneha Reddy", "Vikram Singh", "Pooja Joshi", "Karan Kapoor"
     ]
     transporters = ["V-Trans", "TCI Express", "Gati KWE", "Delhivery Direct", "Blue Dart Cargo", "Safexpress", "DTDC Express"]
     records = []
@@ -151,7 +149,7 @@ def load_default_100_records():
 
     for i in range(1, 101):
         base_name = names_list[(i - 1) % len(names_list)]
-        full_name = f"{base_name}" if i <= 25 else f"{base_name} ({i})"
+        full_name = f"{base_name}" if i <= 10 else f"{base_name} ({i})"
         email_prefix = base_name.split()[0].lower() + str(i)
         inv_dt = base_date + timedelta(days=(i % 20))
         disp_dt = inv_dt + timedelta(days=random.randint(1, 3))
@@ -230,10 +228,14 @@ if uploaded_file is not None:
             new_df = pd.read_csv(uploaded_file)
         else:
             new_df = pd.read_excel(uploaded_file, engine='openpyxl')
+        
+        # Strip string spaces from column headers
+        new_df.columns = new_df.columns.astype(str).str.strip()
+        
         st.session_state['crm_data'] = new_df
         st.session_state['sent_count'] = 0
         st.session_state['failed_count'] = 0
-        st.success(f"✅ Successfully loaded {len(new_df)} records from file!")
+        st.success(f"✅ Successfully loaded {len(new_df)} exact records from Excel!")
     except Exception as e:
         st.error(f"❌ File loading failed: {e}")
 
@@ -258,7 +260,7 @@ st.markdown("---")
 
 # 9. Editable Data Grid
 st.markdown(f"### ✏️ Interactive Live Grid ({len(df)} Records Ready)")
-st.caption("💡 Tip: Double click any cell to instantly modify details.")
+st.caption("💡 Tip: Double click any cell to instantly modify details before dispatch.")
 
 edited_df = st.data_editor(
     st.session_state['crm_data'],
@@ -271,7 +273,7 @@ edited_df = st.data_editor(
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 10. Smart Dispatch Engine
+# 10. Smart Dispatch Engine (Strict Row-By-Row Dynamic Extraction)
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -304,22 +306,29 @@ if start_btn:
             server.starttls()
             server.login(sender_email, app_password)
 
-            for idx in range(len(df)):
+            # Direct Row Iteration guarantees exact value per row
+            for idx, row in df.iterrows():
                 if st.session_state['stop_dispatch']:
                     st.error("🛑 Dispatch process halted manually!")
                     break
 
-                row = df.iloc[idx]
-
-                cust_name = get_field_strict(row, ["Name", "Customer Name", "Client Name"], "Customer")
-                target_email = get_field_strict(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
-                inv_no = get_field_strict(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
-                inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date"], "N/A")
-                disp_date = get_field_strict(row, ["Dispatch Date", "Dispatch_Date", "Disp Date"], "N/A")
-                transporter_val = get_field_strict(row, ["Transporter Name", "Transporter_Name", "Transporter", "Courier"], "N/A")
-                qty = get_field_strict(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity"], "N/A")
-                cases = get_field_strict(row, ["Number of Case", "Cases", "Case Qty", "No of Cases"], "N/A")
-                amount_val = get_field_strict(row, ["Amount", "Total Amount", "Bill Amount"], "N/A")
+                # Extract exact row data dynamically
+                cust_name = get_field_strict(row, ["Name", "Customer Name", "Client Name", "Party Name", "Customer"], "Customer")
+                target_email = get_field_strict(row, ["Email", "Email ID", "Mail", "Email Address", "Mail ID"], "").strip()
+                inv_no = get_field_strict(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice", "Bill No"], "N/A")
+                inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date", "Date"], "N/A")
+                disp_date = get_field_strict(row, ["Dispatch Date", "Dispatch_Date", "Disp Date", "Despatch Date"], "N/A")
+                
+                # Strict Transporter Extraction for THIS specific row
+                transporter_val = get_field_strict(
+                    row, 
+                    ["Transporter Name", "Transporter_Name", "Transporter", "Courier", "Transport", "TransporterName", "LR Transporter", "Vendor", "Vehicle", "Mode of Transport"], 
+                    "N/A"
+                )
+                
+                qty = get_field_strict(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity", "Stock"], "N/A")
+                cases = get_field_strict(row, ["Number of Case", "Cases", "Case Qty", "No of Cases", "Total Cases"], "N/A")
+                amount_val = get_field_strict(row, ["Amount", "Total Amount", "Bill Amount", "Inv Amount"], "N/A")
 
                 if "@" in target_email:
                     msg = MIMEMultipart('alternative')
@@ -333,12 +342,6 @@ if start_btn:
                     <head>
                       <meta charset="utf-8">
                       <style>
-                        @keyframes textFadeIn3Sec {{
-                          0% {{ opacity: 0; transform: translateY(-12px) scale(0.95); filter: drop-shadow(0 0 15px #38bdf8); }}
-                          50% {{ opacity: 0.8; transform: translateY(0) scale(1.02); filter: drop-shadow(0 0 25px #c084fc); }}
-                          100% {{ opacity: 1; transform: translateY(0) scale(1); filter: drop-shadow(0 0 5px #38bdf8); }}
-                        }}
-                        
                         body {{
                           margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc;
                         }}
@@ -350,10 +353,6 @@ if start_btn:
                           padding: 28px 15px;
                           text-align: center;
                           border-bottom: 2px solid #38bdf8;
-                        }}
-                        .fade-text-effect {{
-                          animation: textFadeIn3Sec 3s ease-in-out forwards;
-                          display: inline-block;
                         }}
                         .company-name-text {{
                           font-size: 26px;
@@ -397,10 +396,8 @@ if start_btn:
                     <body>
                       <div class="email-container">
                         <div class="company-intro-banner">
-                          <div class="fade-text-effect">
-                            <h1 class="company-name-text">RAMA ENTERPRISES</h1>
-                            <div class="company-location-text">Abbott India Ltd, Patna</div>
-                          </div>
+                          <h1 class="company-name-text">RAMA ENTERPRISES</h1>
+                          <div class="company-location-text">Abbott India Ltd, Patna</div>
                         </div>
 
                         <div class="content-body">
@@ -459,7 +456,7 @@ if start_btn:
                 else:
                     st.session_state['failed_count'] += 1
 
-                pct = (idx + 1) / len(df)
+                pct = (st.session_state['sent_count'] + st.session_state['failed_count']) / len(df)
                 progress_bar.progress(pct)
                 time.sleep(dispatch_delay)
 
