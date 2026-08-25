@@ -8,82 +8,109 @@ from datetime import datetime, timedelta
 import random
 import re
 
-# 1. Page Configuration
+# 1. Ultra 4K Page Configuration
 st.set_page_config(
-    page_title="CRM Pro Bulk Dispatcher",
+    page_title="CRM Pro Bulk Dispatcher 4K Ultra",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 2. Exact Original UI Styling (Restored from your Screenshot)
+# 2. 4K Ultra Web CSS Styling
 st.markdown("""
 <style>
-    /* Dark Navy Background */
     .stApp {
-        background-color: #12132c;
+        background: linear-gradient(-45deg, #020617, #0f172a, #1e1b4b, #2e1065, #020617);
+        background-size: 400% 400%;
+        animation: gradientBG 12s ease infinite;
         color: #f8fafc;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* Sidebar Background */
-    [data-testid="stSidebar"] {
-        background-color: #1a1c38;
-        border-right: 1px solid #2a2d52;
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
 
-    /* Section Headings */
-    .section-header {
-        font-size: 26px;
-        font-weight: 800;
-        color: #ffffff;
-        margin-top: 25px;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    .floating-header {
+        background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 48px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        animation: gradientShift 6s ease infinite, floatTitle 3s ease-in-out infinite;
+        margin-bottom: 0px;
     }
 
-    /* Counter Cards */
-    .counter-card {
-        background-color: #1a1c38;
-        border: 1px solid #2e325a;
-        border-radius: 12px;
-        padding: 20px 10px;
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    @keyframes floatTitle {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-6px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .logo-frame {
+        display: inline-block;
+        padding: 8px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #38bdf8, #c084fc, #f472b6);
+        animation: pulse4K 2.5s infinite alternate;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+    }
+
+    @keyframes pulse4K {
+        0% { transform: scale(0.97); box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        100% { transform: scale(1.03); box-shadow: 0 0 35px rgba(244, 114, 182, 0.9); }
+    }
+
+    .metric-card {
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 22px;
         text-align: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .metric-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: #38bdf8;
+        box-shadow: 0 15px 45px rgba(56, 189, 248, 0.35);
     }
 
-    .counter-title {
-        font-size: 11px;
-        color: #8c90b5;
+    .metric-title {
+        font-size: 14px;
+        color: #94a3b8;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 8px;
+        letter-spacing: 1.5px;
     }
-
-    .counter-value {
-        font-size: 34px;
+    .metric-value {
+        font-size: 36px;
         font-weight: 900;
-        color: #38bdf8;
-    }
-
-    /* Buttons */
-    .stButton>button {
-        border-radius: 8px !important;
-        font-weight: 700 !important;
-        background-color: #2563eb !important;
-        color: white !important;
-        border: none !important;
+        margin-top: 8px;
+        background: linear-gradient(90deg, #38bdf8, #a855f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Strict Field Extractor
+# 3. Strict Target Extractor to Avoid Column Name Swapping
 def get_field_strict(row, column_aliases, default_val="N/A"):
+    # Clean aliases
     aliases_clean = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
+    # Check exact clean column matches first
     for col in row.index:
         col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
         if col_clean in aliases_clean:
@@ -93,20 +120,23 @@ def get_field_strict(row, column_aliases, default_val="N/A"):
                 
     return default_val
 
-# 4. Default 100 Sample Records Generator
+# 4. Default 100 Sample Customer Records Generator
 @st.cache_data
 def load_default_100_records():
     names_list = [
         "Aarav Sharma", "Priya Patel", "Rahul Verma", "Ananya Iyer", "Amit Gupta",
-        "Rohan Mehta", "Sneha Reddy", "Vikram Singh", "Pooja Joshi", "Karan Kapoor"
+        "Rohan Mehta", "Sneha Reddy", "Vikram Singh", "Pooja Joshi", "Karan Kapoor",
+        "Neha Nair", "Siddharth Rao", "Divya Agarwal", "Aditya Srivastava", "Kavya Deshmukh",
+        "Nikhil Jain", "Riya Malhotra", "Varun Kulkarni", "Meera Pillai", "Gaurav Pandey",
+        "Tanya Saxena", "Manish Choudhary", "Ishita Bhat", "Sanjay Menon", "Anusha Das"
     ]
-    transporters = ["V-Trans", "TCI Express", "Gati KWE", "Blue Dart Cargo", "Safexpress"]
+    transporters = ["V-Trans", "TCI Express", "Gati KWE", "Delhivery Direct", "Blue Dart Cargo", "Safexpress", "DTDC Express"]
     records = []
     base_date = datetime(2026, 8, 1)
 
     for i in range(1, 101):
         base_name = names_list[(i - 1) % len(names_list)]
-        full_name = f"{base_name}" if i <= 10 else f"{base_name} ({i})"
+        full_name = f"{base_name}" if i <= 25 else f"{base_name} ({i})"
         email_prefix = base_name.split()[0].lower() + str(i)
         inv_dt = base_date + timedelta(days=(i % 20))
         disp_dt = inv_dt + timedelta(days=random.randint(1, 3))
@@ -127,7 +157,7 @@ def load_default_100_records():
         })
     return pd.DataFrame(records)
 
-# Session State Setup
+# Session State Initialization
 if 'crm_data' not in st.session_state:
     st.session_state['crm_data'] = load_default_100_records()
 if 'sent_count' not in st.session_state:
@@ -135,23 +165,44 @@ if 'sent_count' not in st.session_state:
 if 'failed_count' not in st.session_state:
     st.session_state['failed_count'] = 0
 
-# 5. Sidebar Controls (Exact Match)
+# 5. Sidebar Controls
 with st.sidebar:
-    st.markdown("### 🖼️ Company Branding")
-    logo_file = st.file_uploader("Upload Company Logo", type=["png", "jpg", "jpeg"])
+    st.markdown("### 🖼️ 4K Branding Studio")
+    logo_file = st.file_uploader("Upload High-Res Logo", type=["png", "jpg", "jpeg"])
 
     st.divider()
 
-    st.markdown("### 🔑 SMTP Server Connection")
+    st.markdown("### 🔑 Secure SMTP Engine")
     smtp_server = st.text_input("SMTP Server", value="smtp.gmail.com")
     smtp_port = st.number_input("SMTP Port", value=587)
     sender_email = st.text_input("Sender Email ID", placeholder="your_email@gmail.com")
     app_password = st.text_input("16-Digit App Password", type="password")
-    dispatch_delay = st.slider("Delay Between Emails (Seconds)", 0.5, 5.0, 1.0)
+    dispatch_delay = st.slider("Dispatch Rate Delay (Seconds)", 0.5, 5.0, 1.0)
 
-# 6. File Upload Section
-st.caption("Upload Excel file having all columns")
-uploaded_file = st.file_uploader("Upload Excel / CSV File", type=["xlsx", "csv"], label_visibility="collapsed")
+# 6. Dynamic Header Section
+col_logo, col_title = st.columns([1, 5])
+
+with col_logo:
+    if logo_file is not None:
+        st.markdown('<div class="logo-frame">', unsafe_allow_html=True)
+        st.image(logo_file, width=110)
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="logo-frame" style="font-size: 55px; padding: 12px 24px;">⚡</div>', unsafe_allow_html=True)
+
+with col_title:
+    st.markdown("<h1 class='floating-header'>CRM Pro Bulk Dispatcher 4K</h1>", unsafe_allow_html=True)
+    st.caption("✨ Ultra-Fast Automated Dispatcher with Dynamic UI Email Generator")
+
+st.divider()
+
+# 7. Excel/CSV Import
+st.markdown("### 📂 Raw Excel / CSV Import (Data Preserved)")
+uploaded_file = st.file_uploader(
+    "Upload fresh Excel file to replace or update active queue", 
+    type=["xlsx", "csv"],
+    help="Support formats: .xlsx, .csv"
+)
 
 if uploaded_file is not None:
     try:
@@ -162,51 +213,53 @@ if uploaded_file is not None:
         st.session_state['crm_data'] = new_df
         st.session_state['sent_count'] = 0
         st.session_state['failed_count'] = 0
-        st.success(f"✅ Loaded {len(new_df)} records successfully!")
+        st.success(f"✅ Successfully loaded {len(new_df)} records from file!")
     except Exception as e:
-        st.error(f"❌ Error loading file: {e}")
+        st.error(f"❌ File loading failed: {e}")
 
-# 7. Live Processing Counters (Exact Screenshot Match)
+# 8. Live 4K Dynamic Counters
 df = st.session_state['crm_data']
 total_records = len(df)
 pending_records = total_records - (st.session_state['sent_count'] + st.session_state['failed_count'])
 
-st.markdown('<div class="section-header">📊 Live Processing Counters</div>', unsafe_allow_html=True)
+st.markdown("### 📊 4K Live Processing Dashboard")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.markdown(f'<div class="counter-card"><div class="counter-title">TOTAL QUEUE</div><div class="counter-value">{total_records}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Total Records</div><div class="metric-value">{total_records}</div></div>', unsafe_allow_html=True)
 with c2:
-    st.markdown(f'<div class="counter-card"><div class="counter-title">SENT SUCCESS</div><div class="counter-value" style="color:#38bdf8;">{st.session_state["sent_count"]}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Sent Success</div><div class="metric-value" style="color:#4ade80;">{st.session_state["sent_count"]}</div></div>', unsafe_allow_html=True)
 with c3:
-    st.markdown(f'<div class="counter-card"><div class="counter-title">FAILED BOUNCES</div><div class="counter-value" style="color:#f87171;">{st.session_state["failed_count"]}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Failed / Bounces</div><div class="metric-value" style="color:#f87171;">{st.session_state["failed_count"]}</div></div>', unsafe_allow_html=True)
 with c4:
-    st.markdown(f'<div class="counter-card"><div class="counter-title">PENDING</div><div class="counter-value" style="color:#38bdf8;">{max(0, pending_records)}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">Queue Pending</div><div class="metric-value" style="color:#fbbf24;">{max(0, pending_records)}</div></div>', unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("---")
 
-# 8. Dispatch Records Preview (Exact Screenshot Match)
-st.markdown(f'<div class="section-header">📋 Dispatch Records Preview ({total_records} Records Available)</div>', unsafe_allow_html=True)
+# 9. Live Editable Data Table Grid
+st.markdown(f"### ✏️ Interactive Live Grid ({len(df)} Records Ready)")
+st.caption("💡 Tip: Double click any cell to instantly modify details.")
 
 edited_df = st.data_editor(
     st.session_state['crm_data'],
     num_rows="dynamic",
     use_container_width=True,
-    height=380,
-    key="data_editor_original"
+    height=420,
+    key="data_editor_4k"
 )
+
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 9. Email Dispatch Engine
+# 10. Smart Dispatch Engine
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
-st.markdown("<br>", unsafe_allow_html=True)
 col_start, col_stop = st.columns([2, 1])
 
 with col_start:
-    start_btn = st.button("🚀 Start Bulk Email Dispatch", use_container_width=True)
+    start_btn = st.button("🚀 Launch Bulk Email Dispatching", type="primary", use_container_width=True)
+
 with col_stop:
     stop_btn = st.button("🛑 Emergency Stop", use_container_width=True)
 
@@ -222,6 +275,7 @@ if start_btn:
         st.warning("⚠️ Kripya sidebar me Sender Email ID aur 16-digit App Password enter karein!")
     else:
         st.markdown("---")
+        st.markdown("### 📡 Real-time Dispatch Progress Monitor")
         progress_bar = st.progress(0)
         status_box = st.empty()
 
@@ -232,103 +286,150 @@ if start_btn:
 
             for idx in range(len(df)):
                 if st.session_state['stop_dispatch']:
-                    st.error("🛑 Dispatch Stopped Manually!")
+                    st.error("🛑 Dispatch process halted manually!")
                     break
 
                 row = df.iloc[idx]
 
+                # Strict Field Extractor (Fixes Interchanged Names)
                 cust_name = get_field_strict(row, ["Name", "Customer Name", "Client Name"], "Customer")
                 target_email = get_field_strict(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
-                inv_no = get_field_strict(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice"], "N/A")
-                inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice"], "N/A")
-                disp_date = get_field_strict(row, ["Dispatch Date", "Disp Date"], "N/A")
-                transporter_val = get_field_strict(row, ["Transporter Name", "Transporter", "Courier"], "N/A")
-                qty = get_field_strict(row, ["Stock Qty", "Stock Quantity", "Qty"], "N/A")
-                cases = get_field_strict(row, ["Number of Case", "Cases", "Case Qty"], "N/A")
+                inv_no = get_field_strict(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
+                inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date"], "N/A")
+                disp_date = get_field_strict(row, ["Dispatch Date", "Dispatch_Date", "Disp Date"], "N/A")
+                
+                # Transporter Name Strict Fetch (Distinct from Customer Name)
+                transporter_val = get_field_strict(row, ["Transporter Name", "Transporter_Name", "Transporter", "Courier"], "N/A")
+                
+                qty = get_field_strict(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity"], "N/A")
+                cases = get_field_strict(row, ["Number of Case", "Cases", "Case Qty", "No of Cases"], "N/A")
                 amount_val = get_field_strict(row, ["Amount", "Total Amount", "Bill Amount"], "N/A")
 
                 if "@" in target_email:
                     msg = MIMEMultipart('alternative')
                     msg['From'] = sender_email
                     msg['To'] = target_email
-                    msg['Subject'] = f"Dispatch Invoice Notice - #{inv_no}"
+                    msg['Subject'] = f"🚀 RAMA ENTERPRISES Abbott India Ltd - Dispatch Notice #{inv_no}"
 
-                    # Clean & Professional Email Template
+                    # Email HTML Body with 3-Sec Fade Effect for "RAMA ENTERPRISES Abbott India Ltd, Patna"
                     body_html = f"""
                     <!DOCTYPE html>
                     <html>
-                    <body style="margin: 0; padding: 0; background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #ffffff; padding: 20px 0;">
-                        <tr>
-                          <td align="center">
-                            <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #0b0f19; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                              
-                              <!-- Header -->
-                              <tr>
-                                <td style="background: linear-gradient(180deg, #180943 0%, #0d0728 100%); padding: 35px 20px 25px 20px; text-align: center; border-bottom: 2px solid #38bdf8;">
-                                  <div style="display: inline-block; background: linear-gradient(90deg, #1d82b6, #e052a0); padding: 8px 18px; border-radius: 4px;">
-                                    <h1 style="font-size: 24px; font-weight: 900; color: #000000; letter-spacing: 2px; margin: 0; text-transform: uppercase;">
-                                      RAMA ENTERPRISES
-                                    </h1>
-                                  </div>
-                                  <div style="font-size: 14px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-top: 12px;">
-                                    Abbott India Ltd, Patna
-                                  </div>
-                                </td>
-                              </tr>
+                    <head>
+                      <meta charset="utf-8">
+                      <style>
+                        @keyframes textFadeIn3Sec {{
+                          0% {{ opacity: 0; transform: translateY(-12px) scale(0.95); filter: drop-shadow(0 0 15px #38bdf8); }}
+                          50% {{ opacity: 0.8; transform: translateY(0) scale(1.02); filter: drop-shadow(0 0 25px #c084fc); }}
+                          100% {{ opacity: 1; transform: translateY(0) scale(1); filter: drop-shadow(0 0 5px #38bdf8); }}
+                        }}
+                        
+                        body {{
+                          margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc;
+                        }}
+                        .email-container {{
+                          max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25);
+                        }}
+                        .company-intro-banner {{
+                          background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065);
+                          padding: 28px 15px;
+                          text-align: center;
+                          border-bottom: 2px solid #38bdf8;
+                        }}
+                        .fade-text-effect {{
+                          animation: textFadeIn3Sec 3s ease-in-out forwards;
+                          display: inline-block;
+                        }}
+                        .company-name-text {{
+                          font-size: 26px;
+                          font-weight: 900;
+                          letter-spacing: 1.5px;
+                          background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
+                          -webkit-background-clip: text;
+                          -webkit-text-fill-color: transparent;
+                          margin: 0;
+                          text-transform: uppercase;
+                        }}
+                        .company-location-text {{
+                          color: #38bdf8; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 6px;
+                        }}
+                        .content-body {{
+                          padding: 25px;
+                        }}
+                        .data-table {{
+                          width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #334155;
+                        }}
+                        .data-table td {{
+                          padding: 14px 18px; border-bottom: 1px solid #1e293b; font-size: 14px;
+                        }}
+                        .data-table tr:last-child td {{
+                          border-bottom: none;
+                        }}
+                        .label-col {{
+                          background-color: #1e293b; color: #94a3b8; font-weight: 700; width: 42%;
+                        }}
+                        .value-col {{
+                          background-color: #0f172a; color: #38bdf8; font-weight: 800;
+                        }}
+                        .highlight-val {{
+                          color: #4ade80 !important; font-size: 16px;
+                        }}
+                        .footer-note {{
+                          text-align: center; padding: 18px; background-color: #020617; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b;
+                        }}
+                      </style>
+                    </head>
+                    <body>
+                      <div class="email-container">
+                        <!-- 3-Second Fade-In Animated Company Header -->
+                        <div class="company-intro-banner">
+                          <div class="fade-text-effect">
+                            <h1 class="company-name-text">RAMA ENTERPRISES</h1>
+                            <div class="company-location-text">Abbott India Ltd, Patna</div>
+                          </div>
+                        </div>
 
-                              <!-- Content -->
-                              <tr>
-                                <td style="padding: 28px; color: #ffffff;">
-                                  <p style="font-size: 16px; margin-top: 0; color: #ffffff;">Dear <b style="color: #a855f7; font-size: 17px;">{cust_name}</b>,</p>
-                                  <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 22px;">
-                                    Your consignment has been dispatched successfully. Below are your invoice & shipment details:
-                                  </p>
+                        <div class="content-body">
+                          <p style="font-size: 16px; color: #f8fafc;">Dear <b style="color: #c084fc;">{cust_name}</b>,</p>
+                          <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your consignment has been dispatched successfully. Below are your invoice & shipment details:</p>
+                          
+                          <table class="data-table">
+                            <tr>
+                              <td class="label-col">📄 Invoice Number</td>
+                              <td class="value-col" style="color: #818cf8;">{inv_no}</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">📅 Invoice Date</td>
+                              <td class="value-col">{inv_date}</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">🚚 Dispatch Date</td>
+                              <td class="value-col">{disp_date}</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">🚛 Transporter Name</td>
+                              <td class="value-col" style="color: #f472b6;">{transporter_val}</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">📦 Stock Quantity</td>
+                              <td class="value-col">{qty}</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">🧰 Number of Cases</td>
+                              <td class="value-col">{cases} Cases</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">💰 Invoice Amount</td>
+                              <td class="value-col highlight-val">{amount_val}</td>
+                            </tr>
+                          </table>
 
-                                  <table width="100%" cellspacing="0" cellpadding="12" style="background-color: #111827; border: 1px solid #1e293b; border-radius: 10px; border-collapse: collapse;">
-                                    <tr style="border-bottom: 1px solid #1e293b;">
-                                      <td width="42%" style="color: #94a3b8; font-weight: 700; font-size: 14px;">📄 Invoice Number</td>
-                                      <td style="color: #6366f1; font-weight: 800; font-size: 15px;">{inv_no}</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid #1e293b;">
-                                      <td style="color: #94a3b8; font-weight: 700; font-size: 14px;">📅 Invoice Date</td>
-                                      <td style="color: #38bdf8; font-weight: 800; font-size: 14px;">{inv_date}</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid #1e293b;">
-                                      <td style="color: #94a3b8; font-weight: 700; font-size: 14px;">🚚 Dispatch Date</td>
-                                      <td style="color: #38bdf8; font-weight: 800; font-size: 14px;">{disp_date}</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid #1e293b;">
-                                      <td style="color: #94a3b8; font-weight: 700; font-size: 14px;">🚛 Transporter Name</td>
-                                      <td style="color: #e052a0; font-weight: 800; font-size: 14px;">{transporter_val}</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid #1e293b;">
-                                      <td style="color: #94a3b8; font-weight: 700; font-size: 14px;">📦 Stock Quantity</td>
-                                      <td style="color: #38bdf8; font-weight: 800; font-size: 14px;">{qty}</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid #1e293b;">
-                                      <td style="color: #94a3b8; font-weight: 700; font-size: 14px;">🧰 Number of Cases</td>
-                                      <td style="color: #38bdf8; font-weight: 800; font-size: 14px;">{cases} Cases</td>
-                                    </tr>
-                                    <tr>
-                                      <td style="color: #94a3b8; font-weight: 700; font-size: 14px;">💰 Total Amount</td>
-                                      <td style="color: #4ade80; font-weight: 900; font-size: 16px;">{amount_val}</td>
-                                    </tr>
-                                  </table>
-
-                                </td>
-                              </tr>
-
-                              <!-- Footer -->
-                              <tr>
-                                <td style="text-align: center; padding: 15px; background-color: #070a12; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b;">
-                                  RAMA ENTERPRISES Abbott India Ltd, Patna
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
+                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES Abbott India Ltd, Patna!</p>
+                        </div>
+                        <div class="footer-note">
+                          ⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna • Automated 4K Dispatcher
+                        </div>
+                      </div>
                     </body>
                     </html>
                     """
@@ -337,7 +438,7 @@ if start_btn:
                     try:
                         server.sendmail(sender_email, target_email, msg.as_string())
                         st.session_state['sent_count'] += 1
-                        status_box.markdown(f"✅ Mail Sent: **{cust_name}** (`{target_email}`) | Inv: `{inv_no}`")
+                        status_box.markdown(f"✅ Mail Sent: **{cust_name}** (`{target_email}`) | Inv: `{inv_no}` | Transporter: **{transporter_val}**")
                     except Exception as send_err:
                         st.session_state['failed_count'] += 1
                         status_box.markdown(f"❌ Failed: `{target_email}`")
@@ -351,7 +452,7 @@ if start_btn:
             server.quit()
             if not st.session_state['stop_dispatch']:
                 st.balloons()
-                st.success("🎉 All bulk dispatch emails processed and sent successfully!")
+                st.success("🎉 All bulk dispatch emails processed and dispatched successfully!")
 
         except Exception as smtp_err:
-            st.error(f"❌ SMTP Error: {smtp_err}")
+            st.error(f"❌ SMTP Error: {smtp_err}. Please check your credentials in the sidebar.")
