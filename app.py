@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Web CSS Styling
+# 2. Web CSS Styling with Enhanced Rajveer Branding
 st.markdown("""
 <style>
     .stApp {
@@ -35,9 +35,8 @@ st.markdown("""
 
     .header-container {
         display: flex;
-        align-items: baseline;
-        gap: 18px;
-        flex-wrap: wrap;
+        flex-direction: column;
+        gap: 6px;
     }
 
     .floating-header {
@@ -45,7 +44,7 @@ st.markdown("""
         background-size: 300% 300%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 42px;
+        font-size: 40px;
         font-weight: 900;
         letter-spacing: -1px;
         animation: gradientShift 6s ease infinite, floatTitle 3s ease-in-out infinite;
@@ -53,13 +52,28 @@ st.markdown("""
         display: inline-block;
     }
 
-    .designer-tag {
-        font-size: 15px;
-        font-weight: 400 !important;
-        color: #94a3b8;
-        letter-spacing: 1px;
-        opacity: 0.9;
-        display: inline-block;
+    /* Prominent Designer Badge for Rajveer */
+    .designer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(192, 132, 252, 0.25));
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        color: #38bdf8;
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        width: fit-content;
+        margin-top: 4px;
+        animation: pulseBadge 3s infinite alternate;
+    }
+
+    @keyframes pulseBadge {
+        0% { border-color: rgba(56, 189, 248, 0.3); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }
+        100% { border-color: rgba(244, 114, 182, 0.7); box-shadow: 0 0 25px rgba(244, 114, 182, 0.4); }
     }
 
     @keyframes gradientShift {
@@ -70,7 +84,7 @@ st.markdown("""
 
     @keyframes floatTitle {
         0% { transform: translateY(0px); }
-        50% { transform: translateY(-6px); }
+        50% { transform: translateY(-4px); }
         100% { transform: translateY(0px); }
     }
 
@@ -122,7 +136,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Super Flexible Field Matching Engine (Catch-all)
+# 3. Super Flexible Field Matching Engine (For Transporter & other fields)
 def get_field_strict(row, column_aliases, default_val="N/A"):
     clean_aliases = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
@@ -133,7 +147,6 @@ def get_field_strict(row, column_aliases, default_val="N/A"):
             if val and val.lower() not in ["nan", "none", "n/a", "", "null"]:
                 return val
                 
-    # Partial substring check fallback
     for col in row.index:
         col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
         for alias in clean_aliases:
@@ -200,7 +213,7 @@ with st.sidebar:
     app_password = st.text_input("16-Digit App Password", type="password")
     dispatch_delay = st.slider("Dispatch Rate Delay (Seconds)", 0.5, 5.0, 1.0)
 
-# 6. Dynamic Header Section
+# 6. Dynamic Header Section with Rajveer Branding Badge
 col_logo, col_title = st.columns([1, 5])
 
 with col_logo:
@@ -215,10 +228,12 @@ with col_title:
     st.markdown("""
     <div class="header-container">
         <h1 class="floating-header">DHARMENDRA KUMAR (MISHRA)</h1>
-        <span class="designer-tag">MADE AND DESIGNED BY RAJVEER</span>
+        <div>
+            <span class="designer-badge">✨ ARCHITECT & DESIGNER: RAJVEER</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
-    st.caption("✨ Ultra-Fast Automated Dispatcher with Dynamic UI Email Generator")
+    st.caption("🚀 Ultra-Fast Automated Dispatcher & Dynamic Email Engine")
 
 st.divider()
 
@@ -279,7 +294,7 @@ edited_df = st.data_editor(
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 10. Smart Dispatch Engine with Column Debugger
+# 10. Smart Dispatch Engine
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -298,9 +313,6 @@ if start_btn:
     st.session_state['stop_dispatch'] = False
     st.session_state['sent_count'] = 0
     st.session_state['failed_count'] = 0
-
-    # DEBUG: Print exact column headers found in your Excel file on screen
-    st.info(f"🔍 DEBUG - Excel Columns Detected: {list(df.columns)}")
 
     if not sender_email or not app_password:
         st.warning("⚠️ Kripya sidebar me Sender Email ID aur 16-digit App Password enter karein!")
@@ -328,7 +340,6 @@ if start_btn:
                 inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date", "Date"], "N/A")
                 disp_date = get_field_strict(row, ["Dispatch Date", "Dispatch_Date", "Disp Date", "Despatch Date"], "N/A")
                 
-                # Comprehensive list of possible transporter header names
                 transporter_val = get_field_strict(
                     row, 
                     ["Transporter Name", "Transporter_Name", "Transporter", "Courier", "Transport", "TransporterName", "LR Transporter", "Vendor", "Vehicle", "Mode of Transport", "Transport Name", "Transporter Co"], 
@@ -386,7 +397,7 @@ if start_btn:
                           </table>
                           <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES Abbott India Ltd, Patna!</p>
                         </div>
-                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna • Automated Dispatcher</div>
+                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES • Designed & Developed by Rajveer</div>
                       </div>
                     </body>
                     </html>
