@@ -16,10 +16,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. 4K Ultra CSS Styling with Dynamic Visual Effects
+# 2. 4K Ultra Web CSS Styling
 st.markdown("""
 <style>
-    /* Global 4K Ultra Background with Dynamic Gradient */
     .stApp {
         background: linear-gradient(-45deg, #020617, #0f172a, #1e1b4b, #2e1065, #020617);
         background-size: 400% 400%;
@@ -34,7 +33,6 @@ st.markdown("""
         100% { background-position: 0% 50%; }
     }
 
-    /* Dynamic Dynamic Title Effect */
     .floating-header {
         background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
         background-size: 300% 300%;
@@ -59,7 +57,6 @@ st.markdown("""
         100% { transform: translateY(0px); }
     }
 
-    /* Glowing Dynamic Logo Frame */
     .logo-frame {
         display: inline-block;
         padding: 8px;
@@ -74,7 +71,6 @@ st.markdown("""
         100% { transform: scale(1.03); box-shadow: 0 0 35px rgba(244, 114, 182, 0.9); }
     }
 
-    /* 4K Glassmorphism Neon Metric Cards */
     .metric-card {
         background: rgba(15, 23, 42, 0.65);
         border: 1px solid rgba(255, 255, 255, 0.15);
@@ -109,28 +105,26 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Advanced Fuzzy Column Extractor Engine (Guarantees zero N/A for filled columns)
-def extract_smart_field(row, search_keywords, default_val="N/A"):
-    # Normalize keywords
-    keywords_clean = [re.sub(r'[^a-zA-Z0-9]', '', str(k)).lower() for k in search_keywords]
-    
-    # 1st Pass: Direct Clean Match
-    for col in row.index:
-        col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
-        if col_clean in keywords_clean:
-            val = str(row[col]).strip()
-            if val and val.lower() not in ["nan", "none", "n/a", ""]:
-                return val
-                
-    # 2nd Pass: Partial Keyword Inclusion Match
-    for col in row.index:
-        col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
-        for kw in keywords_clean:
-            if kw in col_clean or col_clean in kw:
+# Strict Column Extraction Function (Prevents Overlap)
+def get_column_data(row, exact_keywords, default_val="N/A"):
+    # 1. Exact Match Check
+    for kw in exact_keywords:
+        for col in row.index:
+            if str(col).strip().lower() == str(kw).strip().lower():
                 val = str(row[col]).strip()
-                if val and val.lower() not in ["nan", "none", "n/a", ""]:
+                if val and val.lower() not in ["nan", "none", ""]:
                     return val
-                    
+
+    # 2. Clean Word Boundaries Check
+    for kw in exact_keywords:
+        kw_clean = re.sub(r'[^a-zA-Z0-9]', '', str(kw)).lower()
+        for col in row.index:
+            col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
+            if col_clean == kw_clean:
+                val = str(row[col]).strip()
+                if val and val.lower() not in ["nan", "none", ""]:
+                    return val
+
     return default_val
 
 # 3. Default 100 Sample Customer Records Generator
@@ -205,7 +199,7 @@ with col_logo:
 
 with col_title:
     st.markdown("<h1 class='floating-header'>CRM Pro Bulk Dispatcher 4K</h1>", unsafe_allow_html=True)
-    st.caption("✨ Ultra-Fast Automated Dispatcher with High-Speed Mailer & Live Dynamic Grid")
+    st.caption("✨ Ultra-Fast Automated Dispatcher with Dynamic UI Email Generator")
 
 st.divider()
 
@@ -251,7 +245,7 @@ st.markdown("---")
 
 # 8. Live Editable Data Table Grid
 st.markdown(f"### ✏️ Interactive Live Grid ({len(df)} Records Ready)")
-st.caption("💡 Tip: Double click any cell to instantly modify Name, Email, Invoice Number, or Transporter Name.")
+st.caption("💡 Tip: Double click any cell to instantly modify details.")
 
 edited_df = st.data_editor(
     st.session_state['crm_data'],
@@ -264,7 +258,7 @@ edited_df = st.data_editor(
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 9. Smart Dispatch Engine with Guaranteed Transporter Inclusion
+# 9. Smart Dispatch Engine
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -304,60 +298,119 @@ if start_btn:
 
                 row = df.iloc[idx]
 
-                # Guaranteed Fuzzy Extraction for all Fields
-                cust_name = extract_smart_field(row, ["Name", "Customer Name", "Client Name", "Customer"], "Customer")
-                target_email = extract_smart_field(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
-                inv_no = extract_smart_field(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice", "Inv_No"], "N/A")
-                disp_date = extract_smart_field(row, ["Dispatch Date", "Dispatch_Date", "Date", "Disp Date"], "N/A")
-                
-                # Broadest matching keywords for Transporter Name
-                transporter_val = extract_smart_field(
-                    row, 
-                    ["Transporter Name", "Transporter", "Transporter_Name", "Courier", "Transport", "Transporter_Name", "Logistics", "Carrier"], 
-                    "N/A"
-                )
-                
-                qty = extract_smart_field(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity", "Stock"], "N/A")
-                cases = extract_smart_field(row, ["Number of Case", "Cases", "Case Qty", "Case"], "N/A")
+                # Strict Mapping for Each Specific Column
+                cust_name = get_column_data(row, ["Name", "Customer Name", "Client Name"], "Customer")
+                target_email = get_column_data(row, ["Email", "Email ID", "Mail", "Email Address"], "").strip()
+                inv_no = get_column_data(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice"], "N/A")
+                inv_date = get_column_data(row, ["Invoice Date", "Inv Date", "Date Of Invoice"], "N/A")
+                disp_date = get_column_data(row, ["Dispatch Date", "Dispatch_Date", "Disp Date"], "N/A")
+                transporter_val = get_column_data(row, ["Transporter Name", "Transporter", "Transporter_Name", "Courier", "Transport"], "N/A")
+                qty = get_column_data(row, ["Stock Qty", "Stock Quantity", "Qty", "Quantity"], "N/A")
+                cases = get_column_data(row, ["Number of Case", "Cases", "Case Qty"], "N/A")
+                amount_val = get_column_data(row, ["Amount", "Total Amount", "Bill Amount"], "N/A")
 
                 if "@" in target_email:
                     msg = MIMEMultipart('alternative')
                     msg['From'] = sender_email
                     msg['To'] = target_email
-                    msg['Subject'] = f"Dispatch Invoice Notice - #{inv_no}"
+                    msg['Subject'] = f"🚀 Dispatch Invoice Notice - #{inv_no}"
 
+                    # Email Body with Dynamic Dark Glassmorphic Visual UI Design
                     body_html = f"""
+                    <!DOCTYPE html>
                     <html>
-                      <body style="font-family: Arial, sans-serif; color: #1e293b; line-height: 1.6;">
-                        <div style="max-width: 600px; margin: auto; padding: 24px; border: 1px solid #cbd5e1; border-radius: 14px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                          <h2 style="color: #4f46e5; margin-bottom: 6px;">Shipment Dispatch Notification</h2>
-                          <p style="color: #64748b; font-size: 14px; margin-top: 0;">Automated Dispatch Tracker</p>
-                          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 16px 0;">
-                          <p>Dear <b>{cust_name}</b>,</p>
-                          <p>Your consignment has been dispatched successfully. Here are your details:</p>
-                          <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-                            <tr style="background-color: #f8fafc;">
-                              <td style="padding: 12px; border: 1px solid #cbd5e1;"><b>Invoice Number</b></td>
-                              <td style="padding: 12px; border: 1px solid #cbd5e1; color: #4f46e5;"><b>{inv_no}</b></td>
+                    <head>
+                      <meta charset="utf-8">
+                      <style>
+                        body {{
+                          margin: 0; padding: 0; background-color: #0b0f19; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f1f5f9;
+                        }}
+                        .email-container {{
+                          max-width: 650px; margin: 30px auto; background: #111827; border: 1px solid #3b82f6; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+                        }}
+                        .header-banner {{
+                          background: linear-gradient(135deg, #4f46e5, #7c3aed, #db2777); padding: 30px 20px; text-align: center;
+                        }}
+                        .header-banner h1 {{
+                          margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+                        }}
+                        .header-banner p {{
+                          margin: 5px 0 0 0; color: #e0e7ff; font-size: 14px;
+                        }}
+                        .content-body {{
+                          padding: 25px;
+                        }}
+                        .data-table {{
+                          width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937;
+                        }}
+                        .data-table td {{
+                          padding: 14px 18px; border-bottom: 1px solid #1f2937; font-size: 14px;
+                        }}
+                        .data-table tr:last-child td {{
+                          border-bottom: none;
+                        }}
+                        .label-col {{
+                          background-color: #1f2937; color: #9ca3af; font-weight: 600; width: 40%;
+                        }}
+                        .value-col {{
+                          background-color: #111827; color: #38bdf8; font-weight: 700;
+                        }}
+                        .highlight-val {{
+                          color: #4ade80 !important; font-size: 16px;
+                        }}
+                        .footer-note {{
+                          text-align: center; padding: 18px; background-color: #0f172a; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b;
+                        }}
+                      </style>
+                    </head>
+                    <body>
+                      <div class="email-container">
+                        <div class="header-banner">
+                          <h1>Dispatch Notification</h1>
+                          <p>CRM Pro Automated Dispatch Tracking System</p>
+                        </div>
+                        <div class="content-body">
+                          <p style="font-size: 16px; color: #f8fafc;">Dear <b style="color: #a855f7;">{cust_name}</b>,</p>
+                          <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your shipment has been successfully processed and dispatched. Below are the complete invoice and dispatch details:</p>
+                          
+                          <table class="data-table">
+                            <tr>
+                              <td class="label-col">📄 Invoice Number</td>
+                              <td class="value-col" style="color: #818cf8;">{inv_no}</td>
                             </tr>
                             <tr>
-                              <td style="padding: 12px; border: 1px solid #cbd5e1;"><b>Dispatch Date</b></td>
-                              <td style="padding: 12px; border: 1px solid #cbd5e1;"><b>{disp_date}</b></td>
-                            </tr>
-                            <tr style="background-color: #f8fafc;">
-                              <td style="padding: 12px; border: 1px solid #cbd5e1;"><b>Transporter Name</b></td>
-                              <td style="padding: 12px; border: 1px solid #cbd5e1; color: #0284c7;"><b>{transporter_val}</b></td>
+                              <td class="label-col">📅 Invoice Date</td>
+                              <td class="value-col">{inv_date}</td>
                             </tr>
                             <tr>
-                              <td style="padding: 12px; border: 1px solid #cbd5e1;"><b>Quantity / Cases</b></td>
-                              <td style="padding: 12px; border: 1px solid #cbd5e1;"><b>{qty} ({cases} Cases)</b></td>
+                              <td class="label-col">🚚 Dispatch Date</td>
+                              <td class="value-col">{disp_date}</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">🚛 Transporter Name</td>
+                              <td class="value-col" style="color: #f472b6;">{transporter_val}</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">📦 Stock Quantity</td>
+                              <td class="value-col">{qty}</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">🧰 Number of Cases</td>
+                              <td class="value-col">{cases} Cases</td>
+                            </tr>
+                            <tr>
+                              <td class="label-col">💰 Invoice Amount</td>
+                              <td class="value-col highlight-val">{amount_val}</td>
                             </tr>
                           </table>
-                          <p style="margin-top: 22px;">Thank you for your business!</p>
-                          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 20px;">
-                          <p style="font-size: 11px; color: #94a3b8; text-align: center;">This is an automated CRM Pro dispatch email.</p>
+
+                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business!</p>
                         </div>
-                      </body>
+                        <div class="footer-note">
+                          ⚡ Generated by CRM Pro Bulk Dispatcher 4K • Confidential Notice
+                        </div>
+                      </div>
+                    </body>
                     </html>
                     """
                     msg.attach(MIMEText(body_html, 'html'))
@@ -379,7 +432,7 @@ if start_btn:
             server.quit()
             if not st.session_state['stop_dispatch']:
                 st.balloons()
-                st.success("🎉 All bulk dispatch emails sent successfully!")
+                st.success("🎉 All bulk dispatch emails processed and dispatched successfully!")
 
         except Exception as smtp_err:
             st.error(f"❌ SMTP Error: {smtp_err}. Please check your credentials in the sidebar.")
