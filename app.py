@@ -101,8 +101,7 @@ if uploaded_file:
     if uploaded_file.name.endswith('.csv'):
         st.session_state.crm_data = pd.read_csv(uploaded_file)
     else:
-        st.session_state.crm_data = pd.read_excel(uploaded_file)
-
+     st.session_state.crm_data = pd.read_excel(uploaded_file, engine='openpyxl')
 edited_df = st.data_editor(st.session_state.crm_data, num_rows="dynamic", use_container_width=True)
 
 # Live Queue Metrics Dashboard
