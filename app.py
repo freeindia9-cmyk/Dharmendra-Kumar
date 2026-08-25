@@ -15,10 +15,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Custom CSS (Floating Header, Pulsing Logo Frame, Glassmorphism Cards)
+# 2. Custom CSS Styling (Glassmorphism & Animated Theme)
 st.markdown("""
 <style>
-    /* Animated Gradient Background */
     .stApp {
         background: linear-gradient(-45deg, #0f172a, #1e1b4b, #311042, #0f172a);
         background-size: 400% 400%;
@@ -32,7 +31,6 @@ st.markdown("""
         100% { background-position: 0% 50%; }
     }
 
-    /* Floating Header Effect */
     .floating-header {
         background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
         -webkit-background-clip: text;
@@ -49,7 +47,6 @@ st.markdown("""
         100% { transform: translateY(0px); }
     }
 
-    /* Logo Animated Frame Container */
     .logo-frame {
         display: inline-block;
         padding: 6px;
@@ -69,7 +66,6 @@ st.markdown("""
         100% { transform: scale(1.03); box-shadow: 0 0 25px rgba(236, 72, 153, 0.8); }
     }
 
-    /* Glassmorphism Metric Cards */
     .metric-card {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.12);
@@ -139,11 +135,9 @@ def load_default_100_records():
         })
     return pd.DataFrame(records)
 
-# Session state initialization
+# Session State Initialization
 if 'crm_data' not in st.session_state:
     st.session_state['crm_data'] = load_default_100_records()
-
-# Live Counters State Initialization
 if 'sent_count' not in st.session_state:
     st.session_state['sent_count'] = 0
 if 'failed_count' not in st.session_state:
@@ -163,7 +157,7 @@ with st.sidebar:
     app_password = st.text_input("16-Digit App Password", type="password")
     dispatch_delay = st.slider("Dispatch Rate Delay (Seconds)", 0.5, 5.0, 1.0)
 
-# 5. Header Section with Animated Logo Frame
+# 5. Header Section
 col_logo, col_title = st.columns([1, 4])
 
 with col_logo:
@@ -176,11 +170,11 @@ with col_logo:
 
 with col_title:
     st.markdown("<h1 class='floating-header'>CRM Pro Bulk Dispatcher</h1>", unsafe_allow_html=True)
-    st.caption("🚀 Automated Dispatcher with High-Speed Mailer & Interactive Dashboard")
+    st.caption("🚀 Automated Dispatcher with High-Speed Mailer & Live Editable Grid")
 
 st.divider()
 
-# 6. Raw Excel / CSV Upload Option
+# 6. Excel/CSV Import
 st.markdown("### 📂 Raw Excel File (.xlsx) / CSV Se Fresh Records Import Karen")
 uploaded_file = st.file_uploader(
     "Upload Excel file having all columns", 
@@ -201,11 +195,11 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"❌ Error loading file: {e}")
 
+# 7. Live Counters Section
 df = st.session_state['crm_data']
 total_records = len(df)
 pending_records = total_records - (st.session_state['sent_count'] + st.session_state['failed_count'])
 
-# 7. Live Counters Section
 st.markdown("### 📊 Live Processing Counters")
 c1, c2, c3, c4 = st.columns(4)
 
@@ -220,11 +214,22 @@ with c4:
 
 st.markdown("---")
 
-# 8. Data Preview Table
-st.markdown(f"### 📋 Dispatch Records Preview ({len(df)} Records Available)")
-st.dataframe(df, use_container_width=True, height=380)
+# 8. Live Editable Table (Interactive Editor)
+st.markdown(f"### ✏️ Live Editable Dispatch Records ({len(df)} Records Available)")
+st.caption("💡 Tip: Aap kisi bhi cell par double click karke detail change/add kar sakte hain (e.g., apna real email id test karne ke liye).")
 
-# 9. Real SMTP Bulk Email Dispatching Logic with Stop Control
+edited_df = st.data_editor(
+    st.session_state['crm_data'],
+    num_rows="dynamic",
+    use_container_width=True,
+    height=380,
+    key="data_editor"
+)
+
+st.session_state['crm_data'] = edited_df
+df = st.session_state['crm_data']
+
+# 9. Real SMTP Engine with Stop Button
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -253,7 +258,6 @@ if start_btn:
         status_box = st.empty()
 
         try:
-            # Login to SMTP Server
             server = smtplib.SMTP(smtp_server, int(smtp_port))
             server.starttls()
             server.login(sender_email, app_password)
@@ -272,7 +276,6 @@ if start_btn:
                     msg['To'] = target_email
                     msg['Subject'] = f"Dispatch Invoice Update - #{row.get('Invoice Number', 'N/A')}"
 
-                    # HTML Template for High Deliverability (Primary Inbox Landing)
                     body_html = f"""
                     <html>
                       <body style="font-family: Arial, sans-serif; color: #1e293b; line-height: 1.6;">
