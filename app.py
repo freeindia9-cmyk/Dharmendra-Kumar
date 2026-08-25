@@ -122,9 +122,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Robust Dynamic Field Matching Engine
+# 3. Super Flexible Field Matching Engine (Catch-all)
 def get_field_strict(row, column_aliases, default_val="N/A"):
-    # Strip spaces, special characters to allow bulletproof header comparison
     clean_aliases = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
     for col in row.index:
@@ -134,7 +133,7 @@ def get_field_strict(row, column_aliases, default_val="N/A"):
             if val and val.lower() not in ["nan", "none", "n/a", "", "null"]:
                 return val
                 
-    # Fallback: Check if any key contains partial match (e.g., 'transport')
+    # Partial substring check fallback
     for col in row.index:
         col_clean = re.sub(r'[^a-zA-Z0-9]', '', str(col)).lower()
         for alias in clean_aliases:
@@ -238,9 +237,7 @@ if uploaded_file is not None:
         else:
             new_df = pd.read_excel(uploaded_file, engine='openpyxl')
         
-        # Clean column headers
         new_df.columns = [str(c).strip() for c in new_df.columns]
-        
         st.session_state['crm_data'] = new_df
         st.session_state['sent_count'] = 0
         st.session_state['failed_count'] = 0
@@ -282,7 +279,7 @@ edited_df = st.data_editor(
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 10. Smart Dispatch Engine
+# 10. Smart Dispatch Engine with Column Debugger
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -301,6 +298,9 @@ if start_btn:
     st.session_state['stop_dispatch'] = False
     st.session_state['sent_count'] = 0
     st.session_state['failed_count'] = 0
+
+    # DEBUG: Print exact column headers found in your Excel file on screen
+    st.info(f"🔍 DEBUG - Excel Columns Detected: {list(df.columns)}")
 
     if not sender_email or not app_password:
         st.warning("⚠️ Kripya sidebar me Sender Email ID aur 16-digit App Password enter karein!")
@@ -322,17 +322,16 @@ if start_btn:
 
                 row = df.iloc[idx]
 
-                # Dynamic field extraction
                 cust_name = get_field_strict(row, ["Name", "Customer Name", "Client Name", "Party Name", "Customer"], "Customer")
                 target_email = get_field_strict(row, ["Email", "Email ID", "Mail", "Email Address", "Mail ID"], "").strip()
                 inv_no = get_field_strict(row, ["Invoice Number", "Invoice No", "Inv No", "Invoice_Number", "Invoice", "Bill No"], "N/A")
                 inv_date = get_field_strict(row, ["Invoice Date", "Inv Date", "Date Of Invoice", "Invoice_Date", "Date"], "N/A")
                 disp_date = get_field_strict(row, ["Dispatch Date", "Dispatch_Date", "Disp Date", "Despatch Date"], "N/A")
                 
-                # Multi-alias Transporter matching
+                # Comprehensive list of possible transporter header names
                 transporter_val = get_field_strict(
                     row, 
-                    ["Transporter Name", "Transporter_Name", "Transporter", "Courier", "Transport", "TransporterName", "LR Transporter", "Vendor", "Vehicle", "Mode of Transport", "Transport Name"], 
+                    ["Transporter Name", "Transporter_Name", "Transporter", "Courier", "Transport", "TransporterName", "LR Transporter", "Vendor", "Vehicle", "Mode of Transport", "Transport Name", "Transporter Co"], 
                     "N/A"
                 )
                 
@@ -352,55 +351,19 @@ if start_btn:
                     <head>
                       <meta charset="utf-8">
                       <style>
-                        body {{
-                          margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc;
-                        }}
-                        .email-container {{
-                          max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25);
-                        }}
-                        .company-intro-banner {{
-                          background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065);
-                          padding: 28px 15px;
-                          text-align: center;
-                          border-bottom: 2px solid #38bdf8;
-                        }}
-                        .company-name-text {{
-                          font-size: 26px;
-                          font-weight: 900;
-                          letter-spacing: 1.5px;
-                          background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
-                          -webkit-background-clip: text;
-                          -webkit-text-fill-color: transparent;
-                          margin: 0;
-                          text-transform: uppercase;
-                        }}
-                        .company-location-text {{
-                          color: #38bdf8; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 6px;
-                        }}
-                        .content-body {{
-                          padding: 25px;
-                        }}
-                        .data-table {{
-                          width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #334155;
-                        }}
-                        .data-table td {{
-                          padding: 14px 18px; border-bottom: 1px solid #1e293b; font-size: 14px;
-                        }}
-                        .data-table tr:last-child td {{
-                          border-bottom: none;
-                        }}
-                        .label-col {{
-                          background-color: #1e293b; color: #94a3b8; font-weight: 700; width: 42%;
-                        }}
-                        .value-col {{
-                          background-color: #0f172a; color: #38bdf8; font-weight: 800;
-                        }}
-                        .highlight-val {{
-                          color: #4ade80 !important; font-size: 16px;
-                        }}
-                        .footer-note {{
-                          text-align: center; padding: 18px; background-color: #020617; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b;
-                        }}
+                        body {{ margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc; }}
+                        .email-container {{ max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25); }}
+                        .company-intro-banner {{ background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065); padding: 28px 15px; text-align: center; border-bottom: 2px solid #38bdf8; }}
+                        .company-name-text {{ font-size: 26px; font-weight: 900; letter-spacing: 1.5px; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; text-transform: uppercase; }}
+                        .company-location-text {{ color: #38bdf8; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 6px; }}
+                        .content-body {{ padding: 25px; }}
+                        .data-table {{ width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }}
+                        .data-table td {{ padding: 14px 18px; border-bottom: 1px solid #1e293b; font-size: 14px; }}
+                        .data-table tr:last-child td {{ border-bottom: none; }}
+                        .label-col {{ background-color: #1e293b; color: #94a3b8; font-weight: 700; width: 42%; }}
+                        .value-col {{ background-color: #0f172a; color: #38bdf8; font-weight: 800; }}
+                        .highlight-val {{ color: #4ade80 !important; font-size: 16px; }}
+                        .footer-note {{ text-align: center; padding: 18px; background-color: #020617; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b; }}
                       </style>
                     </head>
                     <body>
@@ -409,47 +372,21 @@ if start_btn:
                           <h1 class="company-name-text">RAMA ENTERPRISES</h1>
                           <div class="company-location-text">Abbott India Ltd, Patna</div>
                         </div>
-
                         <div class="content-body">
                           <p style="font-size: 16px; color: #f8fafc;">Dear <b style="color: #c084fc;">{cust_name}</b>,</p>
                           <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your consignment has been dispatched successfully. Below are your invoice & shipment details:</p>
-                          
                           <table class="data-table">
-                            <tr>
-                              <td class="label-col">📄 Invoice Number</td>
-                              <td class="value-col" style="color: #818cf8;">{inv_no}</td>
-                            </tr>
-                            <tr>
-                              <td class="label-col">📅 Invoice Date</td>
-                              <td class="value-col">{inv_date}</td>
-                            </tr>
-                            <tr>
-                              <td class="label-col">🚚 Dispatch Date</td>
-                              <td class="value-col">{disp_date}</td>
-                            </tr>
-                            <tr>
-                              <td class="label-col">🚛 Transporter Name</td>
-                              <td class="value-col" style="color: #f472b6;">{transporter_val}</td>
-                            </tr>
-                            <tr>
-                              <td class="label-col">📦 Stock Quantity</td>
-                              <td class="value-col">{qty}</td>
-                            </tr>
-                            <tr>
-                              <td class="label-col">🧰 Number of Cases</td>
-                              <td class="value-col">{cases} Cases</td>
-                            </tr>
-                            <tr>
-                              <td class="label-col">💰 Invoice Amount</td>
-                              <td class="value-col highlight-val">{amount_val}</td>
-                            </tr>
+                            <tr><td class="label-col">📄 Invoice Number</td><td class="value-col" style="color: #818cf8;">{inv_no}</td></tr>
+                            <tr><td class="label-col">📅 Invoice Date</td><td class="value-col">{inv_date}</td></tr>
+                            <tr><td class="label-col">🚚 Dispatch Date</td><td class="value-col">{disp_date}</td></tr>
+                            <tr><td class="label-col">🚛 Transporter Name</td><td class="value-col" style="color: #f472b6;">{transporter_val}</td></tr>
+                            <tr><td class="label-col">📦 Stock Quantity</td><td class="value-col">{qty}</td></tr>
+                            <tr><td class="label-col">🧰 Number of Cases</td><td class="value-col">{cases} Cases</td></tr>
+                            <tr><td class="label-col">💰 Invoice Amount</td><td class="value-col highlight-val">{amount_val}</td></tr>
                           </table>
-
                           <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES Abbott India Ltd, Patna!</p>
                         </div>
-                        <div class="footer-note">
-                          ⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna • Automated Dispatcher
-                        </div>
+                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES Abbott India Ltd, Patna • Automated Dispatcher</div>
                       </div>
                     </body>
                     </html>
