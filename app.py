@@ -16,9 +16,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Enhanced CSS Styling
+# 2. Enhanced CSS Styling with DYNAMIC BUTTONS & BRANDING
 st.markdown("""
 <style>
+    /* Animated Gradient Background */
     .stApp {
         background: linear-gradient(-45deg, #020617, #0f172a, #1e1b4b, #2e1065, #020617);
         background-size: 400% 400%;
@@ -52,6 +53,7 @@ st.markdown("""
         display: inline-block;
     }
 
+    /* Prominent Designer Badge for Rajveer */
     .designer-badge {
         display: inline-flex;
         align-items: center;
@@ -132,10 +134,91 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+
+    /* 🔥 ULTRA-ATTRACTIVE DYNAMIC BUTTONS & INPUT STYLING 🔥 */
+    div.stButton > button[kind="primary"], div.stButton > button:first-child:not([kind="secondary"]) {
+        background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #d946ef 100%) !important;
+        background-size: 200% 200% !important;
+        color: #ffffff !important;
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 16px 28px !important;
+        box-shadow: 0 0 25px rgba(14, 165, 233, 0.5), 0 0 10px rgba(217, 70, 239, 0.4) !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        cursor: pointer !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        animation: glowShift 4s ease infinite !important;
+    }
+
+    @keyframes glowShift {
+        0% { background-position: 0% 50%; box-shadow: 0 0 25px rgba(14, 165, 233, 0.5); }
+        50% { background-position: 100% 50%; box-shadow: 0 0 35px rgba(217, 70, 239, 0.8); }
+        100% { background-position: 0% 50%; box-shadow: 0 0 25px rgba(14, 165, 233, 0.5); }
+    }
+
+    div.stButton > button[kind="primary"]:hover {
+        transform: translateY(-3px) scale(1.03) !important;
+        box-shadow: 0 10px 40px rgba(217, 70, 239, 0.9), 0 0 20px rgba(56, 189, 248, 0.8) !important;
+        color: #ffffff !important;
+    }
+
+    div.stButton > button[kind="primary"]:active {
+        transform: translateY(1px) scale(0.97) !important;
+    }
+
+    div.stButton > button:nth-child(2), div.stButton > button[kind="secondary"] {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+        color: #ffffff !important;
+        font-size: 16px !important;
+        font-weight: 800 !important;
+        border: 1px solid rgba(239, 68, 68, 0.6) !important;
+        border-radius: 14px !important;
+        padding: 16px 24px !important;
+        box-shadow: 0 0 18px rgba(239, 68, 68, 0.4) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    div.stButton > button:nth-child(2):hover {
+        transform: translateY(-3px) scale(1.03) !important;
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.8) !important;
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+    }
+
+    [data-testid="stFileUploader"] section {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 2px dashed #38bdf8 !important;
+        border-radius: 18px !important;
+        padding: 20px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    [data-testid="stFileUploader"] section:hover {
+        border-color: #f472b6 !important;
+        background: rgba(30, 41, 59, 0.8) !important;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.3) !important;
+    }
+
+    [data-testid="stFileUploader"] button {
+        background: linear-gradient(135deg, #38bdf8, #818cf8) !important;
+        color: #020617 !important;
+        font-weight: 800 !important;
+        border-radius: 10px !important;
+        border: none !important;
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.5) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    [data-testid="stFileUploader"] button:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 0 25px rgba(129, 140, 248, 0.8) !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Dynamic Field Matching Engine
+# 3. Super Flexible Field Matching Engine
 def get_field_strict(row, column_aliases, default_val="N/A"):
     clean_aliases = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
@@ -156,7 +239,7 @@ def get_field_strict(row, column_aliases, default_val="N/A"):
                     
     return default_val
 
-# 4. Default Mock Data Generator
+# 4. Default Records Generator
 @st.cache_data
 def load_default_100_records():
     names_list = [
@@ -190,7 +273,7 @@ def load_default_100_records():
         })
     return pd.DataFrame(records)
 
-# Session State Initializations
+# Session State Initialization
 if 'crm_data' not in st.session_state:
     st.session_state['crm_data'] = load_default_100_records()
 if 'sent_count' not in st.session_state:
@@ -210,9 +293,9 @@ with st.sidebar:
     smtp_port = st.number_input("SMTP Port", value=587)
     sender_email = st.text_input("Sender Email ID", placeholder="your_email@gmail.com")
     app_password = st.text_input("16-Digit App Password", type="password")
-    dispatch_delay = st.slider("Dispatch Rate Delay (Seconds)", 0.1, 5.0, 1.0)
+    dispatch_delay = st.slider("Dispatch Rate Delay (Seconds)", 0.5, 5.0, 1.0)
 
-# 6. Dynamic Header Banner
+# 6. Dynamic Header Section with Rajveer Branding Badge
 col_logo, col_title = st.columns([1, 5])
 
 with col_logo:
@@ -236,12 +319,12 @@ with col_title:
 
 st.divider()
 
-# 7. Data File Import
+# 7. Excel/CSV Import
 st.markdown("### 📂 Raw Excel / CSV Import (Data Preserved)")
 uploaded_file = st.file_uploader(
     "Upload fresh Excel file to replace or update active queue", 
     type=["xlsx", "csv"],
-    help="Supported formats: .xlsx, .csv"
+    help="Support formats: .xlsx, .csv"
 )
 
 if uploaded_file is not None:
@@ -259,7 +342,7 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"❌ File loading failed: {e}")
 
-# 8. Live Stats Dashboard
+# 8. Live Counters
 df = st.session_state['crm_data']
 total_records = len(df)
 pending_records = total_records - (st.session_state['sent_count'] + st.session_state['failed_count'])
@@ -280,7 +363,7 @@ st.markdown("---")
 
 # 9. Editable Data Grid
 st.markdown(f"### ✏️ Interactive Live Grid ({len(df)} Records Ready)")
-st.caption("💡 Tip: Double-click any cell to instantly modify details before dispatch.")
+st.caption("💡 Tip: Double click any cell to instantly modify details.")
 
 edited_df = st.data_editor(
     st.session_state['crm_data'],
@@ -293,7 +376,7 @@ edited_df = st.data_editor(
 st.session_state['crm_data'] = edited_df
 df = st.session_state['crm_data']
 
-# 10. Dispatch Engine Controls
+# 10. Smart Dispatch Engine
 if 'stop_dispatch' not in st.session_state:
     st.session_state['stop_dispatch'] = False
 
@@ -314,7 +397,7 @@ if start_btn:
     st.session_state['failed_count'] = 0
 
     if not sender_email or not app_password:
-        st.warning("⚠️ Kripya sidebar mein Sender Email ID aur 16-digit App Password enter karein!")
+        st.warning("⚠️ Kripya sidebar me Sender Email ID aur 16-digit App Password enter karein!")
     else:
         st.markdown("---")
         st.markdown("### 📡 Real-time Dispatch Progress Monitor")
@@ -364,7 +447,7 @@ if start_btn:
                         body {{ margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc; }}
                         .email-container {{ max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25); }}
                         .company-intro-banner {{ background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065); padding: 28px 15px; text-align: center; border-bottom: 2px solid #38bdf8; }}
-                        .company-name-text {{ font-size: 26px; font-weight: 900; letter-spacing: 1.5px; color: #38bdf8; margin: 0; text-transform: uppercase; }}
+                        .company-name-text {{ font-size: 26px; font-weight: 900; letter-spacing: 1.5px; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; text-transform: uppercase; }}
                         .company-location-text {{ color: #38bdf8; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 6px; }}
                         .content-body {{ padding: 25px; }}
                         .data-table {{ width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }}
@@ -409,10 +492,9 @@ if start_btn:
                         status_box.markdown(f"✅ Mail Sent: **{cust_name}** (`{target_email}`) | Inv: `{inv_no}` | Transporter: **{transporter_val}**")
                     except Exception as send_err:
                         st.session_state['failed_count'] += 1
-                        status_box.markdown(f"❌ Failed to send to `{target_email}`: {send_err}")
+                        status_box.markdown(f"❌ Failed: `{target_email}`")
                 else:
                     st.session_state['failed_count'] += 1
-                    status_box.markdown(f"⚠️ Skipped invalid email format for row {idx + 1}")
 
                 pct = (idx + 1) / len(df)
                 progress_bar.progress(pct)
