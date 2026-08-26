@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Complete Web CSS & A-to-Z Dynamic Button Styling Engine
+# 2. Complete Web CSS & A-to-Z Dynamic Button & Header Styling Engine
 st.markdown("""
 <style>
     /* Animated Gradient Background */
@@ -41,26 +41,34 @@ st.markdown("""
         flex-wrap: wrap;
     }
 
+    /* 🔥 DYNAMIC RGB GLOW & FLOAT FOR MAIN TITLE 🔥 */
     .floating-header {
-        background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6);
+        background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6, #38bdf8);
         background-size: 300% 300%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-size: 42px;
         font-weight: 900;
         letter-spacing: -1px;
-        animation: gradientShift 6s ease infinite, floatTitle 3s ease-in-out infinite;
+        animation: gradientShift 5s ease infinite, floatTitle 3s ease-in-out infinite;
         margin: 0;
         display: inline-block;
+        filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.4));
     }
 
+    /* 🔥 DYNAMIC RGB GLOW & ANIMATION FOR DESIGNER TAG (RAJVEER) 🔥 */
     .designer-tag {
-        font-size: 15px;
-        font-weight: 400 !important;
-        color: #94a3b8;
-        letter-spacing: 1px;
-        opacity: 0.9;
+        font-size: 16px;
+        font-weight: 800 !important;
+        background: linear-gradient(90deg, #f472b6, #c084fc, #38bdf8, #4ade80, #f472b6);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 2px;
         display: inline-block;
+        text-transform: uppercase;
+        animation: gradientShift 4s ease infinite, floatTag 3s ease-in-out infinite 0.5s;
+        filter: drop-shadow(0 0 12px rgba(244, 114, 182, 0.6));
     }
 
     @keyframes gradientShift {
@@ -72,6 +80,12 @@ st.markdown("""
     @keyframes floatTitle {
         0% { transform: translateY(0px); }
         50% { transform: translateY(-6px); }
+        100% { transform: translateY(0px); }
+    }
+
+    @keyframes floatTag {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-4px); }
         100% { transform: translateY(0px); }
     }
 
@@ -121,11 +135,7 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
     }
 
-    /* ============================================================= */
-    /* 🔥 ULTRA-ATTRACTIVE & DYNAMIC A-TO-Z BUTTONS & INPUT STYLING 🔥 */
-    /* ============================================================= */
-
-    /* 1. Primary Action Button (Launch Bulk Email) */
+    /* 🔥 ULTRA-ATTRACTIVE DYNAMIC BUTTONS & INPUT STYLING 🔥 */
     div.stButton > button[kind="primary"], div.stButton > button:first-child:not([kind="secondary"]) {
         background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #d946ef 100%) !important;
         background-size: 200% 200% !important;
@@ -159,7 +169,6 @@ st.markdown("""
         transform: translateY(1px) scale(0.97) !important;
     }
 
-    /* 2. Secondary Buttons (Emergency Stop) */
     div.stButton > button:nth-child(2), div.stButton > button[kind="secondary"] {
         background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
         color: #ffffff !important;
@@ -178,7 +187,6 @@ st.markdown("""
         background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
     }
 
-    /* 3. File Upload Uploader Box & Buttons */
     [data-testid="stFileUploader"] section {
         background: rgba(15, 23, 42, 0.6) !important;
         border: 2px dashed #38bdf8 !important;
@@ -208,7 +216,6 @@ st.markdown("""
         box-shadow: 0 0 25px rgba(129, 140, 248, 0.8) !important;
     }
 
-    /* 4. Text Inputs, Number Inputs & Passwords Focus Glow */
     div[data-baseweb="input"] {
         background: rgba(15, 23, 42, 0.8) !important;
         border: 1px solid rgba(56, 189, 248, 0.4) !important;
@@ -222,7 +229,6 @@ st.markdown("""
         box-shadow: 0 0 18px rgba(244, 114, 182, 0.5) !important;
     }
 
-    /* 5. Slider Handle Glow */
     div[data-baseweb="slider"] [role="slider"] {
         background-color: #38bdf8 !important;
         box-shadow: 0 0 15px #38bdf8 !important;
@@ -435,7 +441,7 @@ if start_btn:
                     msg['To'] = target_email
                     msg['Subject'] = f"🚀 RAMA ENTERPRISES Abbott India Ltd - Dispatch Notice #{inv_no}"
 
-                    # Exact 3-Second Fade-In HTML Template Preserved!
+                    # 3-Second Fade-In HTML Template
                     body_html = f"""
                     <!DOCTYPE html>
                     <html>
