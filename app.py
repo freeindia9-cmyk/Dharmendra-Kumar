@@ -53,7 +53,7 @@ st.markdown("""
         display: inline-block;
     }
 
-    /* Prominent Designer Badge for Rajveer */
+    /* Designer Badge for Rajveer */
     .designer-badge {
         display: inline-flex;
         align-items: center;
@@ -135,7 +135,7 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
     }
 
-    /* 🔥 ULTRA-ATTRACTIVE DYNAMIC BUTTONS & INPUT STYLING 🔥 */
+    /* Dynamic Glow Buttons */
     div.stButton > button[kind="primary"], div.stButton > button:first-child:not([kind="secondary"]) {
         background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #d946ef 100%) !important;
         background-size: 200% 200% !important;
@@ -436,7 +436,7 @@ if start_btn:
                     msg = MIMEMultipart('alternative')
                     msg['From'] = sender_email
                     msg['To'] = target_email
-                    msg['Subject'] = f"🚀 RAMA ENTERPRISES Abbott India Ltd - Dispatch Notice #{inv_no}"
+                    msg['Subject'] = f"🚀 RAMA ENTERPRISES CFA Abbott India Ltd - Dispatch Notice #{inv_no}"
 
                     body_html = f"""
                     <!DOCTYPE html>
@@ -447,7 +447,7 @@ if start_btn:
                         body {{ margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc; }}
                         .email-container {{ max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25); }}
                         .company-intro-banner {{ background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065); padding: 28px 15px; text-align: center; border-bottom: 2px solid #38bdf8; }}
-                        .company-name-text {{ font-size: 26px; font-weight: 900; letter-spacing: 1.5px; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; text-transform: uppercase; }}
+                        .company-name-text {{ font-size: 24px; font-weight: 900; letter-spacing: 1.5px; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; text-transform: uppercase; }}
                         .company-location-text {{ color: #38bdf8; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 6px; }}
                         .content-body {{ padding: 25px; }}
                         .data-table {{ width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }}
@@ -462,8 +462,8 @@ if start_btn:
                     <body>
                       <div class="email-container">
                         <div class="company-intro-banner">
-                          <h1 class="company-name-text">RAMA ENTERPRISES</h1>
-                          <div class="company-location-text">Abbott India Ltd, Patna</div>
+                          <h1 class="company-name-text">RAMA ENTERPRISES CFA ABBOTT INDIA LTD</h1>
+                          <div class="company-location-text">Patna</div>
                         </div>
                         <div class="content-body">
                           <p style="font-size: 16px; color: #f8fafc;">Dear <b style="color: #c084fc;">{cust_name}</b>,</p>
@@ -477,9 +477,9 @@ if start_btn:
                             <tr><td class="label-col">🧰 Number of Cases</td><td class="value-col">{cases} Cases</td></tr>
                             <tr><td class="label-col">💰 Invoice Amount</td><td class="value-col highlight-val">{amount_val}</td></tr>
                           </table>
-                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES Abbott India Ltd, Patna!</p>
+                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES CFA Abbott India Ltd, Patna!</p>
                         </div>
-                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES • Designed & Developed by Rajveer</div>
+                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES CFA Abbott India Ltd • Designed & Developed by Rajveer</div>
                       </div>
                     </body>
                     </html>
