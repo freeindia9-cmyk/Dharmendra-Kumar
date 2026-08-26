@@ -218,7 +218,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Super Flexible Field Matching Engine
+# 3. Flexible Field Matching Engine
 def get_field_strict(row, column_aliases, default_val="N/A"):
     clean_aliases = [re.sub(r'[^a-zA-Z0-9]', '', str(a)).lower() for a in column_aliases]
     
@@ -436,7 +436,7 @@ if start_btn:
                     msg = MIMEMultipart('alternative')
                     msg['From'] = sender_email
                     msg['To'] = target_email
-                    msg['Subject'] = f"🚀 RAMA ENTERPRISES CFA Abbott India Ltd - Dispatch Notice #{inv_no}"
+                    msg['Subject'] = f"🚀 RAMA ENTERPRISES CFA, Abbott India Ltd, Patna - Dispatch Notice #{inv_no}"
 
                     body_html = f"""
                     <!DOCTYPE html>
@@ -444,30 +444,52 @@ if start_btn:
                     <head>
                       <meta charset="utf-8">
                       <style>
-                        body {{ margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc; }}
+                        body {{ margin: 0; padding: 0; background-color: #020617; font-family: 'Segoe UI', 'Trebuchet MS', sans-serif; color: #f8fafc; }}
                         .email-container {{ max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25); }}
                         .company-intro-banner {{ background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065); padding: 28px 15px; text-align: center; border-bottom: 2px solid #38bdf8; }}
-                        .company-name-text {{ font-size: 24px; font-weight: 900; letter-spacing: 1.5px; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; text-transform: uppercase; }}
-                        .company-location-text {{ color: #38bdf8; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 6px; }}
+                        
+                        /* Styled Header Text with preserved colors */
+                        .company-name-text {{ 
+                            font-family: 'Montserrat', 'Segoe UI', sans-serif;
+                            font-size: 28px; 
+                            font-weight: 900; 
+                            letter-spacing: 3px; 
+                            background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6); 
+                            -webkit-background-clip: text; 
+                            -webkit-text-fill-color: transparent; 
+                            margin: 0; 
+                            text-transform: uppercase;
+                        }}
+                        
+                        .company-sub-text {{ 
+                            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+                            color: #38bdf8; 
+                            font-size: 15px; 
+                            font-weight: 700; 
+                            letter-spacing: 2px; 
+                            margin-top: 8px; 
+                            text-transform: uppercase;
+                        }}
+
                         .content-body {{ padding: 25px; }}
                         .data-table {{ width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }}
                         .data-table td {{ padding: 14px 18px; border-bottom: 1px solid #1e293b; font-size: 14px; }}
                         .data-table tr:last-child td {{ border-bottom: none; }}
-                        .label-col {{ background-color: #1e293b; color: #94a3b8; font-weight: 700; width: 42%; }}
-                        .value-col {{ background-color: #0f172a; color: #38bdf8; font-weight: 800; }}
+                        .label-col {{ background-color: #1e293b; color: #94a3b8; font-weight: 700; width: 42%; letter-spacing: 0.5px; }}
+                        .value-col {{ background-color: #0f172a; color: #38bdf8; font-weight: 800; letter-spacing: 0.5px; }}
                         .highlight-val {{ color: #4ade80 !important; font-size: 16px; }}
-                        .footer-note {{ text-align: center; padding: 18px; background-color: #020617; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b; }}
+                        .footer-note {{ text-align: center; padding: 18px; background-color: #020617; color: #64748b; font-size: 12px; border-top: 1px solid #1e293b; letter-spacing: 1px; }}
                       </style>
                     </head>
                     <body>
                       <div class="email-container">
                         <div class="company-intro-banner">
-                          <h1 class="company-name-text">RAMA ENTERPRISES CFA ABBOTT INDIA LTD</h1>
-                          <div class="company-location-text">Patna</div>
+                          <h1 class="company-name-text">RAMA ENTERPRISES</h1>
+                          <div class="company-sub-text">CFA, Abbott India Ltd, Patna</div>
                         </div>
                         <div class="content-body">
-                          <p style="font-size: 16px; color: #f8fafc;">Dear <b style="color: #c084fc;">{cust_name}</b>,</p>
-                          <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5;">Your consignment has been dispatched successfully. Below are your invoice & shipment details:</p>
+                          <p style="font-size: 16px; color: #f8fafc; letter-spacing: 0.5px;">Dear <b style="color: #c084fc;">{cust_name}</b>,</p>
+                          <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6; letter-spacing: 0.3px;">Your consignment has been dispatched successfully. Below are your invoice & shipment details:</p>
                           <table class="data-table">
                             <tr><td class="label-col">📄 Invoice Number</td><td class="value-col" style="color: #818cf8;">{inv_no}</td></tr>
                             <tr><td class="label-col">📅 Invoice Date</td><td class="value-col">{inv_date}</td></tr>
@@ -477,9 +499,9 @@ if start_btn:
                             <tr><td class="label-col">🧰 Number of Cases</td><td class="value-col">{cases} Cases</td></tr>
                             <tr><td class="label-col">💰 Invoice Amount</td><td class="value-col highlight-val">{amount_val}</td></tr>
                           </table>
-                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px;">Thank you for your business with RAMA ENTERPRISES CFA Abbott India Ltd, Patna!</p>
+                          <p style="margin-top: 25px; color: #94a3b8; font-size: 13px; letter-spacing: 0.5px;">Thank you for your business with <b>RAMA ENTERPRISES CFA, Abbott India Ltd, Patna</b>!</p>
                         </div>
-                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES CFA Abbott India Ltd • Designed & Developed by Rajveer</div>
+                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES • Designed & Developed by Rajveer</div>
                       </div>
                     </body>
                     </html>
