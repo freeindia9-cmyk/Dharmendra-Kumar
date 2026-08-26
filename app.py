@@ -448,7 +448,6 @@ if start_btn:
                         .email-container {{ max-width: 650px; margin: 30px auto; background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; overflow: hidden; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25); }}
                         .company-intro-banner {{ background: linear-gradient(135deg, #020617, #1e1b4b, #2e1065); padding: 28px 15px; text-align: center; border-bottom: 2px solid #38bdf8; }}
                         
-                        /* Styled Header Text with preserved colors */
                         .company-name-text {{ 
                             font-family: 'Montserrat', 'Segoe UI', sans-serif;
                             font-size: 28px; 
@@ -501,7 +500,7 @@ if start_btn:
                           </table>
                           <p style="margin-top: 25px; color: #94a3b8; font-size: 13px; letter-spacing: 0.5px;">Thank you for your business with <b>RAMA ENTERPRISES CFA, Abbott India Ltd, Patna</b>!</p>
                         </div>
-                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES • Designed & Developed by Rajveer</div>
+                        <div class="footer-note">⚡ Powered by RAMA ENTERPRISES • Designed & Developed by Dharmendra Kumar (Mishra)</div>
                       </div>
                     </body>
                     </html>
